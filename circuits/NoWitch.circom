@@ -1,6 +1,5 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/mux2.circom";
@@ -61,7 +60,6 @@ template NoWitch()
 
     hh.HandSalt <== HandSalt;
 
-    // TODO Assert?
     hh.Hash === ExpectedHash;
     witchPresentAndAlive.out === 0;
 }
