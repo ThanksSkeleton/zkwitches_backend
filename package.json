@@ -1,7 +1,7 @@
 {
-  "name": "zk-photo",
+  "name": "zkWitches",
   "version": "2.0.0",
-  "description": "Private authenatic photo sharing using ZKP",
+  "description": "Social Deduction Game using ZK",
   "scripts": {
     "compile:contracts": "npx hardhat compile --force",
     "develop": "npx hardhat node",
@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/socathie/zkPhoto.git"
+    "url": "http://google.com"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/socathie/zkPhoto.git/issues"
+    "url": "http://google.com"
   },
-  "homepage": "https://github.com/socathie/zkPhoto.git#readme",
+  "homepage": "http://google.com",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@nomiclabs/hardhat-waffle": "^2.0.2",

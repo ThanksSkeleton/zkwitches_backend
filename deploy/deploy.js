@@ -7,7 +7,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         log: true
     });
 
-    await deploy('zkPhoto', {
+    await deploy('zkWitches', {
         from: deployer,
         log: true,
         args: [verifier.address]

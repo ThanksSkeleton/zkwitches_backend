@@ -12,28 +12,28 @@ else
     wget https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_14.ptau
 fi
 
-echo "Compiling: zkPhoto..."
+echo "Compiling: zkWitches..."
 
-mkdir -p build/zkPhoto
+mkdir -p build/zkWitches
 
 # compile circuit
 
-if [ -f ./build/zkPhoto.r1cs ]; then
+if [ -f ./build/zkWitches.r1cs ]; then
     echo "Circuit already compiled. Skipping."
 else
-    circom zkPhoto.circom --r1cs --wasm --sym -o build
-    snarkjs r1cs info build/zkPhoto.r1cs
+    circom zkWitches.circom --r1cs --wasm --sym -o build
+    snarkjs r1cs info build/zkWitches.r1cs
 fi
 
 # Start a new zkey and make a contribution
 
-if [ -f ./build/zkPhoto/verification_key.json ]; then
+if [ -f ./build/zkWitches/verification_key.json ]; then
     echo "verification_key.json already exists. Skipping."
 else
-    snarkjs groth16 setup build/zkPhoto.r1cs powersOfTau28_hez_final_14.ptau build/zkPhoto/circuit_0000.zkey
-    snarkjs zkey contribute build/zkPhoto/circuit_0000.zkey build/zkPhoto/circuit_final.zkey --name="1st Contributor Name" -v -e="random text"
-    snarkjs zkey export verificationkey build/zkPhoto/circuit_final.zkey build/zkPhoto/verification_key.json
+    snarkjs groth16 setup build/zkWitches.r1cs powersOfTau28_hez_final_14.ptau build/zkWitches/circuit_0000.zkey
+    snarkjs zkey contribute build/zkWitches/circuit_0000.zkey build/zkWitches/circuit_final.zkey --name="1st Contributor Name" -v -e="random text"
+    snarkjs zkey export verificationkey build/zkWitches/circuit_final.zkey build/zkWitches/verification_key.json
 fi
 
 # generate solidity contract
-snarkjs zkey export solidityverifier build/zkPhoto/circuit_final.zkey ../contracts/verifier.sol
+snarkjs zkey export solidityverifier build/zkWitches/circuit_final.zkey ../contracts/verifier.sol
