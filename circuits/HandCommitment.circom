@@ -1,25 +1,44 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/poseidon.circom";
-include "./HandUtils.circom"
-// TODO Include the other logic stuff
+include "./HandUtils.circom";
 
 template HandCommitment() 
 {
-    signal input[4] CitizenCount;
-    signal input[4] WitchPresent;
+    signal input CitizenCount[4];
+    signal input WitchPresent[4];
 
     signal input HandSalt;
 
     signal output Hash;
 
     component hh = HandHash();
-    // TODO Wire up
+    hh.CitizenCount[0] <== CitizenCount[0];
+    hh.CitizenCount[1] <== CitizenCount[1];
+    hh.CitizenCount[2] <== CitizenCount[2];
+    hh.CitizenCount[3] <== CitizenCount[3];
+
+    hh.WitchPresent[0] <== WitchPresent[0];
+    hh.WitchPresent[1] <== WitchPresent[1];
+    hh.WitchPresent[2] <== WitchPresent[2];
+    hh.WitchPresent[3] <== WitchPresent[3];
+
+    hh.HandSalt <== HandSalt;
+
     component hv = HandValid();
-    // TODO Wire up
+    hv.CitizenCount[0] <== CitizenCount[0];
+    hv.CitizenCount[1] <== CitizenCount[1];
+    hv.CitizenCount[2] <== CitizenCount[2];
+    hv.CitizenCount[3] <== CitizenCount[3];
+
+    hv.WitchPresent[0] <== WitchPresent[0];
+    hv.WitchPresent[1] <== WitchPresent[1];
+    hv.WitchPresent[2] <== WitchPresent[2];
+    hv.WitchPresent[3] <== WitchPresent[3];
 
     Hash <== hh.Hash;
 }
+
+// TODO: Mechanic to reconfigure your hand 
 
 // template HandSwap()
 // {
@@ -35,14 +54,13 @@ template HandCommitment()
 //     signal output NewHash;
 // 
 //     component oldhash = HandHash();
-//     // TODO Wire up
 // 
 //     oldhash.Hash === OldHash;
 // 
 //     component newCommitment = HandCommitment();
-//     // TODO Wire up
 // 
 //     NewHash <== newCommitment.Hash;
 // }
 // Initial Commitment for Hand
-component main {} = HandCommitment();
+
+component main = HandCommitment();
