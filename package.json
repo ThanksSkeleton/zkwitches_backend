@@ -9,10 +9,8 @@
     "test": "npx hardhat test",
     "compile:circuits": "bash scripts/compile-circuits.sh",
     "version:fix": "node scripts/bump-solidity",
-    "test:fullProof": "npm run compile:circuits && npm run version:fix && npm run preprocess:image && npm run generate:proof && npm run postprocess:image && npm run compile:contracts && npx hardhat test",
-    "preprocess:image": "node scripts/slice-image && bash scripts/png2json.sh",
-    "postprocess:image": "bash scripts/json2png.sh && node scripts/combine-image && node scripts/png2json output && node scripts/png2base64",
-    "generate:proof": "bash scripts/generate-proof.sh",
+    "test:fullProof": "npm run compile:circuits && npm run version:fix && npm run compile:contracts && npx hardhat test",
+    "generate:proof": "bash scripts/generate-proof.sh && echo TODO",
     "setup:circom": "bash scripts/setup-circom.sh"
   },
   "repository": {

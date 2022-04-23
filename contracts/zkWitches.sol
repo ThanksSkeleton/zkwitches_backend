@@ -2,9 +2,6 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "./Base64.sol";
-
 interface IVerifier {
     function verifyProof(
         uint256[2] memory a,
@@ -317,6 +314,9 @@ contract zkWitches {
         // TODO Mark Surrender
         // TODO Check Victory
     }
+
+    // Game State Advancement
+
 
 
 
