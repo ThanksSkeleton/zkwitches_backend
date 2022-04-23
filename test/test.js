@@ -30,30 +30,38 @@ describe("Verifier Contract", function () {
 });
 */
 describe("zkWitches Contract", function () {
-    let zkWitches;
-    let zkWitches;
-    let a = [];
-    let b = [];
-    let c = [];
-    let d = [];
-    let signers;
-    let balance;
-    let tx;
+    // let a = [];
+    // let b = [];
+    // let c = [];
+    // let d = [];
+    // let signers;
+    // let balance;
+    // let tx;
 
-    for (var i = 0; i < 16; i++) {
-        var array = JSON.parse("[" + fs.readFileSync("./circuits/build/zkWitches/" + i.toString() + "/call.json") + "]");
-        a.push(array[0]);
-        b.push(array[1]);
-        c.push(array[2]);
-        d.push(array[3]);
-    };
+    // for (var i = 0; i < 16; i++) {
+    //     var array = JSON.parse("[" + fs.readFileSync("./circuits/build/zkWitches/" + i.toString() + "/call.json") + "]");
+    //     a.push(array[0]);
+    //     b.push(array[1]);
+    //     c.push(array[2]);
+    //     d.push(array[3]);
+    // };
 
     beforeEach(async function () {
-        let Verifier = await ethers.getContractFactory("Verifier");
-        let verifier = await Verifier.deploy();
-        await verifier.deployed();
-        zkWitches = await ethers.getContractFactory("zkWitches");
-        zkWitches = await zkWitches.deploy(verifier.address);
+        let hc_Verifier = await ethers.getContractFactory("HCVerifier");
+        hc_Verifier = await hc_Verifier.deploy();
+        await hc_Verifier.deployed();
+
+        let vm_Verifier = await ethers.getContractFactory("VMVerifier");
+        vm_Verifier = await vm_Verifier.deploy();
+        await vm_Verifier.deployed();
+
+        let nw_Verifier = await ethers.getContractFactory("NWVerifier");
+        nw_Verifier = await nw_Verifier.deploy();
+        await nw_Verifier.deployed();
+
+
+        let zkWitches = await ethers.getContractFactory("zkWitches");
+        zkWitches = await zkWitches.deploy(hc_Verifier.address, vm_Verifier.address, nw_Verifier.address);
         await zkWitches.deployed();
 
         signers = await ethers.getSigners();
@@ -62,4 +70,9 @@ describe("zkWitches Contract", function () {
         // let txn = await zkWitches.mint(tokenURI.name, tokenURI.description, tokenURI.image, a, b, c, d);
         // tx = await txn.wait();
     });
+
+    it("Should be able to deploy", async function() 
+    {
+    });
+
 });

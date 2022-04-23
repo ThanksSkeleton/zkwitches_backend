@@ -3,12 +3,30 @@
 
 pragma solidity ^0.8.4;
 
-interface IVerifier {
+interface IHCVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[65] memory input
+        uint256[1] memory input
+    ) external view returns (bool);
+}
+
+interface INWVerifier {
+    function verifyProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[6] memory input
+    ) external view returns (bool);
+}
+
+interface IVMVerifier {
+    function verifyProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[7] memory input
     ) external view returns (bool);
 }
 
@@ -123,7 +141,7 @@ contract zkWitches {
         require(slotByAddress(msg.sender) == INVALID_SLOT, "You are already in the game");
         require(tgs.shared.stateEnum == GAME_STARTING, "Game has already started");
         
-        // TODO: proof();
+        require(IHCVerifier(hc_verifierAddr).verifyProof(a, b, c, input), "Invalid handcommitment proof");
 
         tgs.shared.currentNumberOfPlayers++;
         int8 playerSlot = tgs.shared.currentNumberOfPlayers-1;
@@ -180,7 +198,7 @@ contract zkWitches {
         require(player.WitchAlive[2] == int8(uint8 (input[3])), "Witch 2 Alive does not match");
         require(player.WitchAlive[3] == int8(uint8 (input[4])), "Witch 3 Alive does not match");
 
-        //TODO: proof();
+        require(IVMVerifier(vm_verifierAddr).verifyProof(a, b, c, input), "Invalid validmove proof");
 
         ActionCore(int8(uint8 (input[5])), int8(uint8 (actionTarget)), int8(uint8 (input[6])), int8(uint8 (witchType)));
     }
@@ -259,6 +277,9 @@ contract zkWitches {
 
         require(player.handCommitment == input[0], "Hand commitments do not match");
 
+        // TODO: We don't need WitchAlive for Accusation Responses because we check if the accusation is valid on the accuser's step.
+        // It can be removed from the circuit and contract.
+
         require(player.WitchAlive[0] == int8(uint8 (input[1])), "Witch 0 Alive does not match");
         require(player.WitchAlive[1] == int8(uint8 (input[2])), "Witch 1 Alive does not match");
         require(player.WitchAlive[2] == int8(uint8 (input[3])), "Witch 2 Alive does not match");
@@ -266,7 +287,8 @@ contract zkWitches {
 
         require(tgs.shared.accusationWitchType == int8(uint8 (input[5])), "Responding to wrong accusation type");
 
-        // TODO Proof();
+        require(INWVerifier(nw_verifierAddr).verifyProof(a, b, c, input), "Invalid nowitch proof");
+
         // TODO Apply Penalties
         // TODO Advance Game State
     }
