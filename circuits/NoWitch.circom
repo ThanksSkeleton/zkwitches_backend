@@ -64,4 +64,4 @@ template NoWitch()
     witchPresentAndAlive.out === 0;
 }
 
-component main {public [ExpectedHash, WitchAlive, citizenType, CitizenCount]} = NoWitch();
+component main {public [ExpectedHash, WitchAlive, citizenType]} = NoWitch();

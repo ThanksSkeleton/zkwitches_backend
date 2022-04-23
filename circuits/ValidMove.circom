@@ -23,7 +23,7 @@ template ValidMove()
     signal input WitchAlive[4]; 
 
     signal input citizenType;
-    signal input citizenCount;
+    signal input requiredCitizenCount;
 
     component hh = HandHash();
     hh.CitizenCount[0] <== CitizenCount[0];
@@ -78,7 +78,7 @@ template ValidMove()
 
     component citizenCountCheck = GreaterEqThan(3);
     citizenCountCheck.in[0] <== CitizenCountMux.out;
-    citizenCountCheck.in[1] <== citizenCount;
+    citizenCountCheck.in[1] <== requiredCitizenCount;
 
     component citizenOrWitch = OR();
     citizenOrWitch.a <== citizenCountCheck.out;
@@ -88,4 +88,4 @@ template ValidMove()
     citizenOrWitch.out === 1;
 }
 
-component main {public [ExpectedHash, WitchAlive, citizenType, citizenCount]} = ValidMove();
+component main {public [ExpectedHash, WitchAlive, citizenType, requiredCitizenCount]} = ValidMove();
