@@ -34,11 +34,6 @@ contract zkWitches {
 
         address[4] playerAddresses;
         PlayerState[4] players;
-
-        // // not an index! an index+1 (1,2,3,4) (this allows 0 to be "not found")
-        // mapping (address => uint) slotByAddress;
-        // // slot to player
-        // mapping (uint => PlayerState) player;
     }
 
     struct SharedState 
@@ -52,6 +47,7 @@ contract zkWitches {
         int8 playerAccusing;
         int8 accusationWitchType;
 
+        // TODO Tracking time for kick and UI state
         uint previous_action_game_block;
         uint current_block;
         uint current_sequence_number;
