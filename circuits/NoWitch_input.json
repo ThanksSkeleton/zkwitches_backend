@@ -1,8 +1,8 @@
 {
-	'CitizenCount' : [ 0, 1, 2, 3 ],
-	'WitchPresent' : [ 0, 1, 0, 0 ],
-	'HandSalt' : 0
-	'ExpectedHash' : TODO
-	'WitchAlive': [ 1, 1, 1, 1 ],
-	'citizenType': 0
+	"CitizenCount" : [ 0, 1, 2, 3 ],
+	"WitchPresent" : [ 0, 1, 0, 0 ],
+	"HandSalt" : 0,
+	"ExpectedHash" : "9230182617660605374415851193724903651342296183907450604039318143940998878483",
+	"WitchAlive": [ 1, 1, 1, 1 ],
+	"citizenType": 0
 }

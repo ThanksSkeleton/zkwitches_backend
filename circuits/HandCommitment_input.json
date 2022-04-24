@@ -1,5 +1,5 @@
 {
-	'CitizenCount' : [ 0, 1, 2, 3 ],
-	'WitchPresent' : [ 0, 1, 0, 0 ],
-	'HandSalt' : 0
+	"CitizenCount" : [ 0, 1, 2, 3 ],
+	"WitchPresent" : [ 0, 1, 0, 0 ],
+	"HandSalt" : 0
 }
