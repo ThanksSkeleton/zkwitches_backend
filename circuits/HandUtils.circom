@@ -4,8 +4,6 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/gates.circom";
 
-// TODO Include the other logic stuff
-
 template HandHash() 
 {    
     signal input CitizenCount[4];
@@ -52,7 +50,6 @@ template HandValid() {
         AllValid.in[i*2+1] <== witch_gates[i].out;
     }
 
-    // TODO Assert?
-    CitizenCount[0] + WitchPresent[0] + CitizenCount[1] + WitchPresent[1] + CitizenCount[2] + WitchPresent[2] + CitizenCount[3] + WitchPresent[3] === 9;
+    CitizenCount[0] + WitchPresent[0] + CitizenCount[1] + WitchPresent[1] + CitizenCount[2] + WitchPresent[2] + CitizenCount[3] + WitchPresent[3] === 7;
     AllValid.out === 1;
 }

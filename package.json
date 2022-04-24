@@ -9,8 +9,8 @@
     "test": "npx hardhat test",
     "compile:circuits": "bash scripts/compile-circuits.sh",
     "version:fix": "node scripts/bump-solidity",
-    "test:fullProof": "npm run compile:circuits && npm run version:fix && npm run compile:contracts && npx hardhat test",
-    "generate:proof": "bash scripts/generate-proof.sh && echo TODO",
+    "test:fullProof": "npm run compile:circuits && npm run version:fix && npm run compile:contracts && generate:proof && npx hardhat test",
+    "generate:proof": "bash scripts/generate-proofs.sh",
     "setup:circom": "bash scripts/setup-circom.sh"
   },
   "repository": {
