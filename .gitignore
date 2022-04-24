@@ -118,5 +118,5 @@ circuits/archive
 scripts/archive
 *.ptau
 contracts/archive
-circuits/build/*.*
+circuits/build/**
 artifacts
