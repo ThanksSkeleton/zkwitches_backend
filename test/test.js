@@ -1,7 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const fs = require("fs");
-const tokenURI = require("./token.json");
 const { toHex } = require("web3-utils");
 /*
 describe("Verifier Contract", function () {
@@ -47,18 +46,17 @@ describe("zkWitches Contract", function () {
     // };
 
     beforeEach(async function () {
-        let hc_Verifier = await ethers.getContractFactory("HCVerifier");
+        let hc_Verifier = await ethers.getContractFactory("HCVerifier"); // TODO Replace
         hc_Verifier = await hc_Verifier.deploy();
         await hc_Verifier.deployed();
 
-        let vm_Verifier = await ethers.getContractFactory("VMVerifier");
+        let vm_Verifier = await ethers.getContractFactory("VMVerifier"); // TODO Replace
         vm_Verifier = await vm_Verifier.deploy();
         await vm_Verifier.deployed();
 
-        let nw_Verifier = await ethers.getContractFactory("NWVerifier");
+        let nw_Verifier = await ethers.getContractFactory("NWVerifier"); // TODO Replace
         nw_Verifier = await nw_Verifier.deploy();
         await nw_Verifier.deployed();
-
 
         let zkWitches = await ethers.getContractFactory("zkWitches");
         zkWitches = await zkWitches.deploy(hc_Verifier.address, vm_Verifier.address, nw_Verifier.address);
@@ -66,13 +64,43 @@ describe("zkWitches Contract", function () {
 
         signers = await ethers.getSigners();
         balance = await signers[0].getBalance();
-
-        // let txn = await zkWitches.mint(tokenURI.name, tokenURI.description, tokenURI.image, a, b, c, d);
-        // tx = await txn.wait();
     });
+	
+	// Basic Deployment
 
     it("Should be able to deploy", async function() 
     {
     });
+	
+	// Verifier Tests
+	
+	it("HCVerifier Verifies Correctly", async function() 
+    {
+		// TODO
+    }); 
+	
+	it("VMVerifier Verifies Correctly", async function() 
+    {
+		// TODO
+    }); 
+
+	it("NMVerifier Verifies Correctly", async function() 
+    {
+		// TODO
+    }); 
+
+	it("HC Verifier REJECTS incorrect proof", async function() 
+    {
+		// TODO
+    }); 
+	
+	// ZKWitches Contract Tests
+	
+	it("ZKWitches: can join new empty game", async function() 
+    {
+		// TODO
+    }); 
+	
+	// a lot more needed.
 
 });
