@@ -24,7 +24,8 @@ module.exports = {
     networks: {
         hardhat: {
             gas: 100000000,
-            blockGasLimit: 0x1fffffffffffff
+            blockGasLimit: 0x1fffffffffffff,
+			chainId: 1337
         },
         testnet: {
             url: "https://api.s0.b.hmny.io",

@@ -46,15 +46,15 @@ describe("zkWitches Contract", function () {
     // };
 
     beforeEach(async function () {
-        let hc_Verifier = await ethers.getContractFactory("HCVerifier"); // TODO Replace
+        let hc_Verifier = await ethers.getContractFactory("contracts/HandCommitment_verifier.sol:Verifier"); // TODO Replace
         hc_Verifier = await hc_Verifier.deploy();
         await hc_Verifier.deployed();
 
-        let vm_Verifier = await ethers.getContractFactory("VMVerifier"); // TODO Replace
+        let vm_Verifier = await ethers.getContractFactory("contracts/ValidMove_verifier.sol:Verifier"); // TODO Replace
         vm_Verifier = await vm_Verifier.deploy();
         await vm_Verifier.deployed();
 
-        let nw_Verifier = await ethers.getContractFactory("NWVerifier"); // TODO Replace
+        let nw_Verifier = await ethers.getContractFactory("contracts/NoWitch_verifier.sol:Verifier"); // TODO Replace
         nw_Verifier = await nw_Verifier.deploy();
         await nw_Verifier.deployed();
 
