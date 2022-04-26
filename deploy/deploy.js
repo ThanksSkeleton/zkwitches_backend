@@ -2,16 +2,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 	
-    const hcverifier = await deploy('contracts/HandCommitment_verifier.sol:Verifier', {
+    const hcverifier = await deploy('', {
         from: deployer,
+        contract: 'contracts/HandCommitment_verifier.sol:Verifier',
         log: true
     });
-	const vmverifier = await deploy('contracts/ValidMove_verifier.sol:Verifier', {
+	const vmverifier = await deploy('', {
         from: deployer,
+        contract:'contracts/ValidMove_verifier.sol:Verifier',
         log: true
     });
-	const nwverifier = await deploy('contracts/NoWitch_verifier.sol:Verifier', {
+	const nwverifier = await deploy('', {
         from: deployer,
+        contract:'contracts/NoWitch_verifier.sol:Verifier',
         log: true
     });
 	

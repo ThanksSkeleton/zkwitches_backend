@@ -1,6 +1,6 @@
 {
-  "name": "zkWitches",
-  "version": "2.0.0",
+  "name": "zkwitches",
+  "version": "0.9.0",
   "description": "Social Deduction Game using ZK",
   "scripts": {
     "compile:contracts": "npx hardhat compile --force",
