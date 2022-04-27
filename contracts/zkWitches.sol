@@ -50,8 +50,15 @@ contract zkWitches {
     {
         SharedState shared;
 
-        address[4] playerAddresses;
-        PlayerState[4] players;
+        address address0;
+        address address1;
+        address address2;
+        address address3;
+
+        PlayerState player0;
+        PlayerState player1;
+        PlayerState player2;
+        PlayerState player3;
     }
 
     struct SharedState 
@@ -79,8 +86,12 @@ contract zkWitches {
         int8 food;
         int8 lumber;
 
-        int8[4] WitchAlive;
+        int8 WitchAlive0;
+        int8 WitchAlive1;
+        int8 WitchAlive2;
+        int8 WitchAlive3;
     }
+
 
     TotalGameState public tgs;
 
@@ -92,7 +103,7 @@ contract zkWitches {
     {
         for (uint i=0; i<4; i++)
         {   
-            if (tgs.playerAddresses[i] == a) 
+            if (getPlayerAddress(int8(uint8 (i))) == a) 
             {
                 return int8(uint8 (i));
             }
@@ -102,8 +113,127 @@ contract zkWitches {
 
     function getPlayer(int8 slot) public view returns (PlayerState memory) 
     {
-        return tgs.players[uint(uint8 (slot))];
+        if (slot == 0) 
+        {
+            return tgs.player0;
+        } 
+        else if (slot == 1) 
+        {
+            return tgs.player1;
+        } 
+        else if (slot == 2) 
+        {
+            return tgs.player2;
+        } 
+        else if (slot == 3) 
+        {
+            return tgs.player3;
+        } 
+        else 
+        {
+            assert(false); 
+            return tgs.player0; // Todo Stupid
+        }
     }
+
+    
+    function setPlayer(int8 slot, PlayerState memory input) private 
+    {
+        if (slot == 0) 
+        {
+            tgs.player0 = input;
+        } 
+        else if (slot == 1) 
+        {
+            tgs.player1 = input;
+        } 
+        else if (slot == 2) 
+        {
+            tgs.player2 = input;
+        } 
+        else if (slot == 3) 
+        {
+            tgs.player3 = input;
+        } 
+        else 
+        {
+            assert(false);
+        }
+    }
+
+    function getPlayerAddress(int8 slot) public view returns (address) 
+    {
+        if (slot == 0) 
+        {
+            return tgs.address0;
+        } 
+        else if (slot == 1) 
+        {
+            return tgs.address1;
+        } 
+        else if (slot == 2) 
+        {
+            return tgs.address2;
+        } 
+        else if (slot == 3) 
+        {
+            return tgs.address3;
+        } 
+        else 
+        {
+            assert(false);
+            return tgs.address0; // Todo Stupid
+        }
+    }
+
+    function setPlayerAddress(int8 slot, address input) private 
+    {
+        if (slot == 0) 
+        {
+            tgs.address0 = input;
+        } 
+        else if (slot == 1) 
+        {
+            tgs.address1 = input;
+        } 
+        else if (slot == 2) 
+        {
+            tgs.address2 = input;
+        } 
+        else if (slot == 3) 
+        {
+            tgs.address3 = input;
+        } 
+        else 
+        {
+            assert(false);
+        }
+    }
+
+    function getWitchAlive(PlayerState memory inputPlayer, int8 witchType) public view returns (int8) 
+    {
+        if (witchType == 0) 
+        {
+            return inputPlayer.WitchAlive0;
+        } 
+        else if (witchType == 1) 
+        {
+            return inputPlayer.WitchAlive1;
+        } 
+        else if (witchType == 2) 
+        {
+            return inputPlayer.WitchAlive2;
+        } 
+        else if (witchType == 3) 
+        {
+            return inputPlayer.WitchAlive3;
+        } 
+        else 
+        {
+            assert(false);
+        }
+    }
+
 
     constructor(address hc_verifier, address vm_verifier, address nw_verifier) {
         hc_verifierAddr = hc_verifier;
@@ -117,22 +247,6 @@ contract zkWitches {
 
      function DEBUG_Reset() public 
      {
-         PlayerState[] memory newPlayers = new PlayerState[](4);
-
-         for (int8 i = 0; i<=3; i++) 
-         {
-            newPlayers[uint(uint8 (i))] = PlayerState( 
-            {   
-                isAlive: false,
-                handCommitment:  0,
-
-                food: 0,
-                lumber: 0,
-
-                WitchAlive: [int8(1),1,1,1]
-            });
-         }
-
          tgs = TotalGameState( 
          {
 
@@ -153,32 +267,61 @@ contract zkWitches {
             current_sequence_number : 0
          }),
 
-         playerAddresses : [ address(0),  address(0),  address(0), address(0)],
+         address0 : address(0),
+         address1 : address(0),
+         address2 : address(0),
+         address3 : address(0),
 
-         players : [newPlayers[0], newPlayers[1],newPlayers[2],newPlayers[3]]
+         player0 : PlayerState({
+             isAlive: false,
+             handCommitment : 0,
+             food : 0,
+             lumber : 0,
+             WitchAlive0 : 0,
+             WitchAlive1 : 0,
+             WitchAlive2 : 0,
+             WitchAlive3 : 0
+         }), 
+
+        player1 : PlayerState({
+             isAlive: false,
+             handCommitment : 0,
+             food : 0,
+             lumber : 0,
+             WitchAlive0 : 0,
+             WitchAlive1 : 0,
+             WitchAlive2 : 0,
+             WitchAlive3 : 0
+         }) ,
+
+        player2 : PlayerState({
+             isAlive: false,
+             handCommitment : 0,
+             food : 0,
+             lumber : 0,
+             WitchAlive0 : 0,
+             WitchAlive1 : 0,
+             WitchAlive2 : 0,
+             WitchAlive3 : 0
+         }) ,
+
+        player3 : PlayerState({
+             isAlive: false,
+             handCommitment : 0,
+             food : 0,
+             lumber : 0,
+             WitchAlive0 : 0,
+             WitchAlive1 : 0,
+             WitchAlive2 : 0,
+             WitchAlive3 : 0
+         }) 
          });
      }
 
 
      function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
      {
-         tgs.shared = inputTgs.shared;
-
-         for (int8 i = 0; i<=3; i++) 
-         {
-            tgs.playerAddresses[uint(uint8 (i))] = inputTgs.playerAddresses[uint(uint8 (i))];
-            PlayerState memory newPlayer = PlayerState( 
-            {   
-                isAlive: inputTgs.players[uint(uint8 (i))].isAlive,
-                handCommitment:  inputTgs.players[uint(uint8 (i))].handCommitment,
-
-                food: inputTgs.players[uint(uint8 (i))].food,
-                lumber: inputTgs.players[uint(uint8 (i))].lumber,
-
-                WitchAlive: [inputTgs.players[uint(uint8 (i))].WitchAlive[0], inputTgs.players[uint(uint8 (i))].WitchAlive[1], inputTgs.players[uint(uint8 (i))].WitchAlive[2], inputTgs.players[uint(uint8 (i))].WitchAlive[3]]
-            });
-            tgs.players[uint(uint8 (i))] = newPlayer;
-         }
+         //
      }
 
     // Joining The game
@@ -201,7 +344,7 @@ contract zkWitches {
 
         tgs.shared.currentNumberOfPlayers++;
         int8 playerSlot = tgs.shared.currentNumberOfPlayers-1;
-        tgs.playerAddresses[uint(uint8 (playerSlot))] = msg.sender;
+        setPlayerAddress(playerSlot, msg.sender);
         PlayerState memory newPlayer = PlayerState( 
         {   
             isAlive: true,
@@ -210,9 +353,12 @@ contract zkWitches {
             food: 0,
             lumber: 0,
 
-            WitchAlive: [int8(1),1,1,1]
+             WitchAlive0 : 1,
+             WitchAlive1 : 1,
+             WitchAlive2 : 1,
+             WitchAlive3 : 1
         });
-        tgs.players[uint(uint8 (playerSlot))] = newPlayer;
+        setPlayer(playerSlot, newPlayer);
 
         // TODO: Advance game state if full
     }
@@ -249,10 +395,10 @@ contract zkWitches {
 
         require(player.handCommitment == input[0], "Hand commitments do not match");
 
-        require(player.WitchAlive[0] == int8(uint8 (input[1])), "Witch 0 Alive does not match");
-        require(player.WitchAlive[1] == int8(uint8 (input[2])), "Witch 1 Alive does not match");
-        require(player.WitchAlive[2] == int8(uint8 (input[3])), "Witch 2 Alive does not match");
-        require(player.WitchAlive[3] == int8(uint8 (input[4])), "Witch 3 Alive does not match");
+        require(getWitchAlive(player,0) == int8(uint8 (input[1])), "Witch 0 Alive does not match");
+        require(getWitchAlive(player,1) == int8(uint8 (input[2])), "Witch 1 Alive does not match");
+        require(getWitchAlive(player,2) == int8(uint8 (input[3])), "Witch 2 Alive does not match");
+        require(getWitchAlive(player,3) == int8(uint8 (input[4])), "Witch 3 Alive does not match");
 
         require(IVMVerifier(vm_verifierAddr).verifyProof(a, b, c, input), "Invalid validmove proof");
 
@@ -336,10 +482,10 @@ contract zkWitches {
         // TODO: We don't need WitchAlive for Accusation Responses because we check if the accusation is valid on the accuser's step.
         // It can be removed from the circuit and contract.
 
-        require(player.WitchAlive[0] == int8(uint8 (input[1])), "Witch 0 Alive does not match");
-        require(player.WitchAlive[1] == int8(uint8 (input[2])), "Witch 1 Alive does not match");
-        require(player.WitchAlive[2] == int8(uint8 (input[3])), "Witch 2 Alive does not match");
-        require(player.WitchAlive[3] == int8(uint8 (input[4])), "Witch 3 Alive does not match");
+        require(getWitchAlive(player,0) == int8(uint8 (input[1])), "Witch 0 Alive does not match");
+        require(getWitchAlive(player,1) == int8(uint8 (input[2])), "Witch 1 Alive does not match");
+        require(getWitchAlive(player,2) == int8(uint8 (input[3])), "Witch 2 Alive does not match");
+        require(getWitchAlive(player,3) == int8(uint8 (input[4])), "Witch 3 Alive does not match");
 
         require(tgs.shared.accusationWitchType == int8(uint8 (input[5])), "Responding to wrong accusation type");
 
