@@ -110,14 +110,75 @@ contract zkWitches {
         vm_verifierAddr = vm_verifier;
         nw_verifierAddr = nw_verifier;
 
-        // DEBUG_Reset();
+        DEBUG_Reset();
     }
 
     // Debug Surface Area:
 
+     function DEBUG_Reset() public 
+     {
+         PlayerState[] memory newPlayers = new PlayerState[](4);
+
+         for (int8 i = 0; i<=3; i++) 
+         {
+            newPlayers[uint(uint8 (i))] = PlayerState( 
+            {   
+                isAlive: false,
+                handCommitment:  0,
+
+                food: 0,
+                lumber: 0,
+
+                WitchAlive: [int8(1),1,1,1]
+            });
+         }
+
+         tgs = TotalGameState( 
+         {
+
+         shared : SharedState
+         ({
+            stateEnum : GAME_STARTING,  
+            playerSlotWaiting : 0,
+
+            currentNumberOfPlayers : 0,
+
+            // Active Accusation Info
+            playerAccusing : 0,
+            accusationWitchType : 0,
+
+            // TODO Tracking time for kick and UI state
+            previous_action_game_block : 0,
+            current_block : 0,
+            current_sequence_number : 0
+         }),
+
+         playerAddresses : [ address(0),  address(0),  address(0), address(0)],
+
+         players : [newPlayers[0], newPlayers[1],newPlayers[2],newPlayers[3]]
+         });
+     }
+
+
      function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
      {
-         tgs = inputTgs;
+         tgs.shared = inputTgs.shared;
+
+         for (int8 i = 0; i<=3; i++) 
+         {
+            tgs.playerAddresses[uint(uint8 (i))] = inputTgs.playerAddresses[uint(uint8 (i))];
+            PlayerState memory newPlayer = PlayerState( 
+            {   
+                isAlive: inputTgs.players[uint(uint8 (i))].isAlive,
+                handCommitment:  inputTgs.players[uint(uint8 (i))].handCommitment,
+
+                food: inputTgs.players[uint(uint8 (i))].food,
+                lumber: inputTgs.players[uint(uint8 (i))].lumber,
+
+                WitchAlive: [inputTgs.players[uint(uint8 (i))].WitchAlive[0], inputTgs.players[uint(uint8 (i))].WitchAlive[1], inputTgs.players[uint(uint8 (i))].WitchAlive[2], inputTgs.players[uint(uint8 (i))].WitchAlive[3]]
+            });
+            tgs.players[uint(uint8 (i))] = newPlayer;
+         }
      }
 
     // Joining The game
