@@ -1,8 +1,10 @@
-require("@nomiclabs/hardhat-waffle");
-require("@nomiclabs/hardhat-ethers");
+require('@typechain/hardhat')
+require('@nomiclabs/hardhat-ethers')
+require('@nomiclabs/hardhat-waffle')
 require("hardhat-deploy");
 require("hardhat-contract-sizer");
 require("hardhat-gas-reporter");
+
 
 // Replace this private key with your Harmony account private key
 // To export your private key from Metamask, open Metamask and

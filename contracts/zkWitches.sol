@@ -99,6 +99,11 @@ contract zkWitches {
     address public vm_verifierAddr;
     address public nw_verifierAddr;
 
+    function GetTGS() public view returns (TotalGameState memory) 
+    {
+        return tgs;
+    }
+
     function slotByAddress(address a) public view returns (int8) 
     {
         for (uint i=0; i<4; i++)

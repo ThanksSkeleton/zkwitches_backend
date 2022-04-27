@@ -120,5 +120,6 @@ scripts/archive
 contracts/archive
 circuits/build/**
 artifacts
+typechain-types
 #TODO Add Verifiers to ignore once build process is nice and clean
 # contracts/*.sol !contracts/zkWitches.sol
