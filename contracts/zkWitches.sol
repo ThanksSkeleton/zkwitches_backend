@@ -82,7 +82,7 @@ contract zkWitches {
         int8[4] WitchAlive;
     }
 
-    TotalGameState tgs;
+    TotalGameState public tgs;
 
     address public hc_verifierAddr;
     address public vm_verifierAddr;
@@ -115,15 +115,10 @@ contract zkWitches {
 
     // Debug Surface Area:
 
-    // function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
-    // {
-    //     tgs = inputTgs;
-    // }
-
-    // function DEBUG_Reset() public
-    // {
-    //     // TODO Initialize
-    // }
+     function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
+     {
+         tgs = inputTgs;
+     }
 
     // Joining The game
     // TODO Payable + all that
