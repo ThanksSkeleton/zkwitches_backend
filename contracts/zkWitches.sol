@@ -326,7 +326,75 @@ contract zkWitches {
 
      function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
      {
-         //
+         tgs = TotalGameState( 
+         {
+
+         shared : SharedState
+         ({
+            stateEnum : inputTgs.shared.stateEnum,  
+            playerSlotWaiting : inputTgs.shared.playerSlotWaiting,
+
+            currentNumberOfPlayers : inputTgs.shared.currentNumberOfPlayers,
+
+            // Active Accusation Info
+            playerAccusing : inputTgs.shared.playerAccusing,
+            accusationWitchType : inputTgs.shared.accusationWitchType,
+
+            // TODO Tracking time for kick and UI state
+            previous_action_game_block : inputTgs.shared.previous_action_game_block,
+            current_block : inputTgs.shared.current_block,
+            current_sequence_number : inputTgs.shared.current_sequence_number
+         }),
+
+         address0 : inputTgs.address0,
+         address1 : inputTgs.address1,
+         address2 : inputTgs.address2,
+         address3 : inputTgs.address3,
+
+         player0 : PlayerState({
+             isAlive: inputTgs.player0.isAlive,
+             handCommitment : inputTgs.player0.handCommitment,
+             food :  inputTgs.player0.food,
+             lumber : inputTgs.player0.lumber,
+             WitchAlive0 : inputTgs.player0.WitchAlive0,
+             WitchAlive1 : inputTgs.player0.WitchAlive1,
+             WitchAlive2 : inputTgs.player0.WitchAlive2,
+             WitchAlive3 : inputTgs.player0.WitchAlive3
+         }), 
+
+         player1 : PlayerState({
+             isAlive: inputTgs.player1.isAlive,
+             handCommitment : inputTgs.player1.handCommitment,
+             food :  inputTgs.player1.food,
+             lumber : inputTgs.player1.lumber,
+             WitchAlive0 : inputTgs.player1.WitchAlive0,
+             WitchAlive1 : inputTgs.player1.WitchAlive1,
+             WitchAlive2 : inputTgs.player1.WitchAlive2,
+             WitchAlive3 : inputTgs.player1.WitchAlive3
+         }), 
+
+         player2 : PlayerState({
+             isAlive: inputTgs.player2.isAlive,
+             handCommitment : inputTgs.player2.handCommitment,
+             food :  inputTgs.player2.food,
+             lumber : inputTgs.player2.lumber,
+             WitchAlive0 : inputTgs.player2.WitchAlive0,
+             WitchAlive1 : inputTgs.player2.WitchAlive1,
+             WitchAlive2 : inputTgs.player2.WitchAlive2,
+             WitchAlive3 : inputTgs.player2.WitchAlive3
+         }), 
+
+         player3 : PlayerState({
+             isAlive: inputTgs.player3.isAlive,
+             handCommitment : inputTgs.player3.handCommitment,
+             food :  inputTgs.player3.food,
+             lumber : inputTgs.player3.lumber,
+             WitchAlive0 : inputTgs.player3.WitchAlive0,
+             WitchAlive1 : inputTgs.player3.WitchAlive1,
+             WitchAlive2 : inputTgs.player3.WitchAlive2,
+             WitchAlive3 : inputTgs.player3.WitchAlive3
+         })
+         });
      }
 
     // Joining The game
