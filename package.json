@@ -10,6 +10,7 @@
     "compile:circuits": "bash scripts/compile-circuits.sh",
     "version:fix": "node scripts/bump-solidity",
     "test:fullProof": "npm run compile:circuits && npm run version:fix && npm run compile:contracts && npm run generate:proof && npx hardhat test",
+	"test:partial": "npm run compile:contracts && npm run generate:proof && npx hardhat test",
     "generate:proof": "bash scripts/generate-proofs.sh",
     "setup:circom": "bash scripts/setup-circom.sh"
   },
