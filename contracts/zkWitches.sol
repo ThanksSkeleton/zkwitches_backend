@@ -244,87 +244,9 @@ contract zkWitches {
         hc_verifierAddr = hc_verifier;
         vm_verifierAddr = vm_verifier;
         nw_verifierAddr = nw_verifier;
-
-        DEBUG_Reset();
     }
 
-    // Debug Surface Area:
-
-     function DEBUG_Reset() public 
-     {
-         tgs = TotalGameState( 
-         {
-
-         shared : SharedState
-         ({
-            stateEnum : GAME_STARTING,  
-            playerSlotWaiting : 0,
-
-            currentNumberOfPlayers : 0,
-
-            // Active Accusation Info
-            playerAccusing : 0,
-            accusationWitchType : 0,
-
-            // TODO Tracking time for kick and UI state
-            previous_action_game_block : 0,
-            current_block : 0,
-            current_sequence_number : 0
-         }),
-
-         address0 : address(0),
-         address1 : address(0),
-         address2 : address(0),
-         address3 : address(0),
-
-         player0 : PlayerState({
-             isAlive: false,
-             handCommitment : 0,
-             food : 0,
-             lumber : 0,
-             WitchAlive0 : 0,
-             WitchAlive1 : 0,
-             WitchAlive2 : 0,
-             WitchAlive3 : 0
-         }), 
-
-        player1 : PlayerState({
-             isAlive: false,
-             handCommitment : 0,
-             food : 0,
-             lumber : 0,
-             WitchAlive0 : 0,
-             WitchAlive1 : 0,
-             WitchAlive2 : 0,
-             WitchAlive3 : 0
-         }) ,
-
-        player2 : PlayerState({
-             isAlive: false,
-             handCommitment : 0,
-             food : 0,
-             lumber : 0,
-             WitchAlive0 : 0,
-             WitchAlive1 : 0,
-             WitchAlive2 : 0,
-             WitchAlive3 : 0
-         }) ,
-
-        player3 : PlayerState({
-             isAlive: false,
-             handCommitment : 0,
-             food : 0,
-             lumber : 0,
-             WitchAlive0 : 0,
-             WitchAlive1 : 0,
-             WitchAlive2 : 0,
-             WitchAlive3 : 0
-         }) 
-         });
-     }
-
-
-     function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
+    function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
      {
          tgs = TotalGameState( 
          {

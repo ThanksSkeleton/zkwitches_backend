@@ -28,7 +28,6 @@ module.exports = {
             gas: 100000000,
             blockGasLimit: 0x1fffffffffffff,
 			chainId: 1337,
-            allowUnlimitedContractSize : true
         },
         testnet: {
             url: "https://api.s0.b.hmny.io",
