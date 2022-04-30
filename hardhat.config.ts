@@ -1,11 +1,10 @@
-require('@typechain/hardhat')
-require('@nomiclabs/hardhat-ethers')
-require('@nomiclabs/hardhat-waffle')
-require("hardhat-deploy");
-require("hardhat-contract-sizer");
-require("hardhat-gas-reporter");
-require('fs');
-const { test, production } = require("./private_keys.json");
+import '@typechain/hardhat'
+import ('@nomiclabs/hardhat-ethers')
+import ('@nomiclabs/hardhat-waffle')
+import ("hardhat-deploy");
+import ("hardhat-gas-reporter");
+import ('fs');
+const { testkey, productionkey } = require("./private_keys.json");
 
 module.exports = {
     solidity: {
@@ -24,12 +23,12 @@ module.exports = {
         testnet: {
             url: "https://api.s0.b.hmny.io",
             chainId: 1666700000,
-            accounts: [`${test}`]
+            accounts: [`${testkey}`]
         },
         mainnet: {
             url: "https://api.s0.t.hmny.io",
             chainId: 1666600000,
-            accounts: [`${production}`]
+            accounts: [`${productionkey}`]
         },
     },
     namedAccounts: {

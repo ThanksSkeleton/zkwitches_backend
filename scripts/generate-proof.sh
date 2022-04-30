@@ -14,4 +14,4 @@ snarkjs groth16 prove build/$1/circuit_final.zkey build/$1/witness.wtns build/$1
 snarkjs groth16 verify build/$1/verification_key.json build/$1/public.json build/$1/proof.json
 
 # generate call
-snarkjs zkey export soliditycalldata build/$1/public.json build/$1/proof.json > build/$1/call.json
+snarkjs zkey export soliditycalldata build/$1/public.json build/$1/proof.json > build/$1/call.txt
