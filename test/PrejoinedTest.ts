@@ -12,7 +12,7 @@ import chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
 
-describe("zkWitches Contract", function () {
+describe("zkWitches Contract - Pre Joined Game", function () {
 
     let hc_Verifier: HCVerifier;
     let vm_Verifier: VMVerifier;
@@ -36,7 +36,6 @@ describe("zkWitches Contract", function () {
         zkWitches = await fact4.deploy(hc_Verifier.address, vm_Verifier.address, nw_Verifier.address) as ZkWitches;
         await zkWitches.deployed();
 
-        // signers = await ethers.getSigners();
         // balance = await signers[0].getBalance();
     });
 	
@@ -101,7 +100,4 @@ describe("zkWitches Contract", function () {
         await expect(zkWitches.JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.not.be.rejected;
         await expect(zkWitches.JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.be.rejected;
     }); 
-
-	// a lot more needed.
-
 });
