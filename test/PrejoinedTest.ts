@@ -7,7 +7,7 @@ import { ContractFactory, Contract } from "ethers";
 import { Verifier as HCVerifier } from "../typechain-types/HandCommitment_verifier.sol";
 import { Verifier as NWVerifier } from "../typechain-types/NoWitch_verifier.sol";
 import { Verifier as VMVerifier } from "../typechain-types/ValidMove_verifier.sol";
-import { ZkWitches } from "../typechain-types/zkWitches.sol";
+import { ZkWitches  } from "../typechain-types/zkWitches.sol";
 import chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
@@ -99,5 +99,75 @@ describe("zkWitches Contract - Pre Joined Game", function () {
         var hccall_array = JSON.parse("[" + fs.readFileSync(hccall) + "]");
         await expect(zkWitches.JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.not.be.rejected;
         await expect(zkWitches.JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.be.rejected;
+    }); 
+
+    it("Empty Fetch TotalGameState", async function() 
+    {
+        await expect(zkWitches.GetTGS()).to.not.be.rejected;
+    }); 
+
+    it("TotalGameState Set and Fetch", async function() 
+    {
+        let inputTGS : ZkWitches.TotalGameStateStruct = {
+            shared: {
+                stateEnum: 1,
+                playerSlotWaiting: 0,
+                currentNumberOfPlayers: 0,
+                playerAccusing: 0,
+                accusationWitchType: 0,
+                previous_action_game_block: 0,
+                current_block: 0,
+                current_sequence_number: 0
+            },
+            address0: "0x8ba1f109551bd432803012645ac136ddd64dba72",
+            address1: "0x8ba1f109551bd432803012645ac136ddd64dba71",
+            address2: "0x8ba1f109551bd432803012645ac136ddd64dba70",
+            address3: "0x8ba1f109551bd432803012645ac136ddd64dba69",
+            player0: {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive0: 1,
+                WitchAlive1: 1,
+                WitchAlive2: 1,
+                WitchAlive3: 1
+            },
+            player1: {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive0: 1,
+                WitchAlive1: 1,
+                WitchAlive2: 1,
+                WitchAlive3: 1
+            },
+            player2: {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive0: 1,
+                WitchAlive1: 1,
+                WitchAlive2: 1,
+                WitchAlive3: 1
+            },
+            player3: {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive0: 1,
+                WitchAlive1: 1,
+                WitchAlive2: 1,
+                WitchAlive3: 1
+            }
+        };
+
+        await expect(zkWitches.DEBUG_SetGameState(inputTGS)).to.not.be.rejected;
+        await expect(zkWitches.GetTGS()).to.not.be.rejected;
+        let fetched = await zkWitches.GetTGS();
+        expect(fetched.shared.stateEnum).to.be.eq(1);
     }); 
 });
