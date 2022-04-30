@@ -33,44 +33,40 @@ interface IVMVerifier {
 contract zkWitches {
 
     // Action Types
-    int8 constant FOOD = 0;
-    int8 constant LUMBER = 1;
-    int8 constant BRIGAND = 2;
-    int8 constant INQUISITOR = 3;
+    uint8 constant FOOD = 0;
+    uint8 constant LUMBER = 1;
+    uint8 constant BRIGAND = 2;
+    uint8 constant INQUISITOR = 3;
 
     // GameState Types
-    int8 constant GAME_STARTING = 0;
-    int8 constant WAITING_FOR_PLAYER_TURN = 1;
-    int8 constant WAITING_FOR_PLAYER_ACCUSATION_RESPONSE = 2;
-    int8 constant GAME_OVER = 3;
+    uint8 constant GAME_STARTING = 0;
+    uint8 constant WAITING_FOR_PLAYER_TURN = 1;
+    uint8 constant WAITING_FOR_PLAYER_ACCUSATION_RESPONSE = 2;
+    uint8 constant GAME_OVER = 3;
 
-    int8 constant INVALID_SLOT = -1;
+    uint8 constant INVALID_SLOT = 5;
+
+    uint8 constant STARTING_FOOD = 2;
+    uint8 constant STARTING_LUMBER = 2;
 
     struct TotalGameState 
     {
         SharedState shared;
 
-        address address0;
-        address address1;
-        address address2;
-        address address3;
-
-        PlayerState player0;
-        PlayerState player1;
-        PlayerState player2;
-        PlayerState player3;
+        address[4] addresses;
+        PlayerState[4] players;
     }
 
     struct SharedState 
     {
-        int8 stateEnum;        
-        int8 playerSlotWaiting;
+        uint8 stateEnum;        
+        uint8 playerSlotWaiting;
 
-        int8 currentNumberOfPlayers;
+        uint8 currentNumberOfPlayers;
 
         // Active Accusation Info
-        int8 playerAccusing;
-        int8 accusationWitchType;
+        uint8 playerAccusing;
+        uint8 accusationWitchType;
 
         // TODO Tracking time for kick and UI state
         uint previous_action_game_block;
@@ -83,13 +79,10 @@ contract zkWitches {
         bool isAlive;
         uint handCommitment;
 
-        int8 food;
-        int8 lumber;
+        uint8 food;
+        uint8 lumber;
 
-        int8 WitchAlive0;
-        int8 WitchAlive1;
-        int8 WitchAlive2;
-        int8 WitchAlive3;
+        uint8[4] WitchAlive; // TODO bool?
     }
 
 
@@ -104,141 +97,17 @@ contract zkWitches {
         return tgs;
     }
 
-    function slotByAddress(address a) public view returns (int8) 
+    function slotByAddress(address a) public view returns (uint8) 
     {
-        for (uint i=0; i<4; i++)
+        for (uint i=0; i<tgs.shared.currentNumberOfPlayers; i++)
         {   
-            if (getPlayerAddress(int8(uint8 (i))) == a) 
+            if (tgs.addresses[i] == a) 
             {
-                return int8(uint8 (i));
+                return uint8 (i);
             }
         }
-        return -1;
+        return uint8 (INVALID_SLOT);
     }
-
-    function getPlayer(int8 slot) public view returns (PlayerState memory) 
-    {
-        if (slot == 0) 
-        {
-            return tgs.player0;
-        } 
-        else if (slot == 1) 
-        {
-            return tgs.player1;
-        } 
-        else if (slot == 2) 
-        {
-            return tgs.player2;
-        } 
-        else if (slot == 3) 
-        {
-            return tgs.player3;
-        } 
-        else 
-        {
-            assert(false); 
-            return tgs.player0; // Todo Stupid
-        }
-    }
-
-    
-    function setPlayer(int8 slot, PlayerState memory input) private 
-    {
-        if (slot == 0) 
-        {
-            tgs.player0 = input;
-        } 
-        else if (slot == 1) 
-        {
-            tgs.player1 = input;
-        } 
-        else if (slot == 2) 
-        {
-            tgs.player2 = input;
-        } 
-        else if (slot == 3) 
-        {
-            tgs.player3 = input;
-        } 
-        else 
-        {
-            assert(false);
-        }
-    }
-
-    function getPlayerAddress(int8 slot) public view returns (address) 
-    {
-        if (slot == 0) 
-        {
-            return tgs.address0;
-        } 
-        else if (slot == 1) 
-        {
-            return tgs.address1;
-        } 
-        else if (slot == 2) 
-        {
-            return tgs.address2;
-        } 
-        else if (slot == 3) 
-        {
-            return tgs.address3;
-        } 
-        else 
-        {
-            assert(false);
-            return tgs.address0; // Todo Stupid
-        }
-    }
-
-    function setPlayerAddress(int8 slot, address input) private 
-    {
-        if (slot == 0) 
-        {
-            tgs.address0 = input;
-        } 
-        else if (slot == 1) 
-        {
-            tgs.address1 = input;
-        } 
-        else if (slot == 2) 
-        {
-            tgs.address2 = input;
-        } 
-        else if (slot == 3) 
-        {
-            tgs.address3 = input;
-        } 
-        else 
-        {
-            assert(false);
-        }
-    }
-
-    function getWitchAlive(PlayerState memory inputPlayer, int8 witchType) public view returns (int8) 
-    {
-        if (witchType == 0) 
-        {
-            return inputPlayer.WitchAlive0;
-        } 
-        else if (witchType == 1) 
-        {
-            return inputPlayer.WitchAlive1;
-        } 
-        else if (witchType == 2) 
-        {
-            return inputPlayer.WitchAlive2;
-        } 
-        else if (witchType == 3) 
-        {
-            return inputPlayer.WitchAlive3;
-        } 
-        else 
-        {
-            assert(false);
-        }
-    }
-
 
     constructor(address hc_verifier, address vm_verifier, address nw_verifier) {
         hc_verifierAddr = hc_verifier;
@@ -246,78 +115,10 @@ contract zkWitches {
         nw_verifierAddr = nw_verifier;
     }
 
-    function DEBUG_SetGameState(TotalGameState memory inputTgs) public 
-     {
-         tgs = TotalGameState( 
-         {
-
-         shared : SharedState
-         ({
-            stateEnum : inputTgs.shared.stateEnum,  
-            playerSlotWaiting : inputTgs.shared.playerSlotWaiting,
-
-            currentNumberOfPlayers : inputTgs.shared.currentNumberOfPlayers,
-
-            // Active Accusation Info
-            playerAccusing : inputTgs.shared.playerAccusing,
-            accusationWitchType : inputTgs.shared.accusationWitchType,
-
-            // TODO Tracking time for kick and UI state
-            previous_action_game_block : inputTgs.shared.previous_action_game_block,
-            current_block : inputTgs.shared.current_block,
-            current_sequence_number : inputTgs.shared.current_sequence_number
-         }),
-
-         address0 : inputTgs.address0,
-         address1 : inputTgs.address1,
-         address2 : inputTgs.address2,
-         address3 : inputTgs.address3,
-
-         player0 : PlayerState({
-             isAlive: inputTgs.player0.isAlive,
-             handCommitment : inputTgs.player0.handCommitment,
-             food :  inputTgs.player0.food,
-             lumber : inputTgs.player0.lumber,
-             WitchAlive0 : inputTgs.player0.WitchAlive0,
-             WitchAlive1 : inputTgs.player0.WitchAlive1,
-             WitchAlive2 : inputTgs.player0.WitchAlive2,
-             WitchAlive3 : inputTgs.player0.WitchAlive3
-         }), 
-
-         player1 : PlayerState({
-             isAlive: inputTgs.player1.isAlive,
-             handCommitment : inputTgs.player1.handCommitment,
-             food :  inputTgs.player1.food,
-             lumber : inputTgs.player1.lumber,
-             WitchAlive0 : inputTgs.player1.WitchAlive0,
-             WitchAlive1 : inputTgs.player1.WitchAlive1,
-             WitchAlive2 : inputTgs.player1.WitchAlive2,
-             WitchAlive3 : inputTgs.player1.WitchAlive3
-         }), 
-
-         player2 : PlayerState({
-             isAlive: inputTgs.player2.isAlive,
-             handCommitment : inputTgs.player2.handCommitment,
-             food :  inputTgs.player2.food,
-             lumber : inputTgs.player2.lumber,
-             WitchAlive0 : inputTgs.player2.WitchAlive0,
-             WitchAlive1 : inputTgs.player2.WitchAlive1,
-             WitchAlive2 : inputTgs.player2.WitchAlive2,
-             WitchAlive3 : inputTgs.player2.WitchAlive3
-         }), 
-
-         player3 : PlayerState({
-             isAlive: inputTgs.player3.isAlive,
-             handCommitment : inputTgs.player3.handCommitment,
-             food :  inputTgs.player3.food,
-             lumber : inputTgs.player3.lumber,
-             WitchAlive0 : inputTgs.player3.WitchAlive0,
-             WitchAlive1 : inputTgs.player3.WitchAlive1,
-             WitchAlive2 : inputTgs.player3.WitchAlive2,
-             WitchAlive3 : inputTgs.player3.WitchAlive3
-         })
-         });
-     }
+    function DEBUG_SetGameState(TotalGameState calldata inputTgs) public 
+    {
+        tgs = inputTgs;
+    }
 
     // Joining The game
     // TODO Payable + all that
@@ -336,24 +137,20 @@ contract zkWitches {
         require(tgs.shared.stateEnum == GAME_STARTING, "Game has already started");
         
         require(IHCVerifier(hc_verifierAddr).verifyProof(a, b, c, input), "Invalid handcommitment proof");
+        
+        uint256 playerSlot = tgs.shared.currentNumberOfPlayers;
 
         tgs.shared.currentNumberOfPlayers++;
-        int8 playerSlot = tgs.shared.currentNumberOfPlayers-1;
-        setPlayerAddress(playerSlot, msg.sender);
-        PlayerState memory newPlayer = PlayerState( 
+
+        tgs.addresses[playerSlot] = msg.sender;
+        tgs.players[playerSlot].isAlive = true;
+        tgs.players[playerSlot].handCommitment = input[0];
+        tgs.players[playerSlot].food = STARTING_FOOD;
+        tgs.players[playerSlot].food = STARTING_LUMBER;
+        for (uint i=0; i<4; i++)
         {   
-            isAlive: true,
-            handCommitment: input[0],
-
-            food: 0,
-            lumber: 0,
-
-             WitchAlive0 : 1,
-             WitchAlive1 : 1,
-             WitchAlive2 : 1,
-             WitchAlive3 : 1
-        });
-        setPlayer(playerSlot, newPlayer);
+            tgs.players[playerSlot].WitchAlive[i] = 1;
+        }
 
         // TODO: Advance game state if full
     }
@@ -363,8 +160,8 @@ contract zkWitches {
     function ActionWithProof(
         // required but not part of the proof
         // ignored if not relevant to action
-        uint actionTarget,
-        uint witchType,
+        uint8 actionTarget,
+        uint8 witchType,
         // proof             
         uint[2] memory a,
         uint[2][2] memory b,
@@ -379,40 +176,36 @@ contract zkWitches {
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
-        int8 slot = slotByAddress(msg.sender);
+        uint8 slot = slotByAddress(msg.sender);
 
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_TURN, "Not waiting for a player action");
         require(tgs.shared.playerSlotWaiting == slot, "Not your turn.");
 
-        // Check proof inputs match contract state
+        require(tgs.players[slot].handCommitment == input[0], "Hand commitments do not match");
 
-        PlayerState memory player = getPlayer(slot);
-
-        require(player.handCommitment == input[0], "Hand commitments do not match");
-
-        require(getWitchAlive(player,0) == int8(uint8 (input[1])), "Witch 0 Alive does not match");
-        require(getWitchAlive(player,1) == int8(uint8 (input[2])), "Witch 1 Alive does not match");
-        require(getWitchAlive(player,2) == int8(uint8 (input[3])), "Witch 2 Alive does not match");
-        require(getWitchAlive(player,3) == int8(uint8 (input[4])), "Witch 3 Alive does not match");
+        for (uint i=0; i<4; i++)
+        {   
+            require(tgs.players[slot].WitchAlive[i] == uint8(input[1+i]), "Witch Alive does not match for index"); // TODO better message
+        }
 
         require(IVMVerifier(vm_verifierAddr).verifyProof(a, b, c, input), "Invalid validmove proof");
 
-        ActionCore(int8(uint8 (input[5])), int8(uint8 (actionTarget)), int8(uint8 (input[6])), int8(uint8 (witchType)));
+        ActionCore(uint8(input[5]), actionTarget, uint8(input[6]), witchType);
     }
 
-    function ActionNoProof(uint actionType, uint actionTarget, uint witchType) public 
+    function ActionNoProof(uint8 actionType, uint8 actionTarget, uint8 witchType) public 
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
-        int8 slot = slotByAddress(msg.sender);
+        uint8 slot = slotByAddress(msg.sender);
 
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_TURN, "Not waiting for a player action");
         require(tgs.shared.playerSlotWaiting == slot, "Not your turn.");
 
-        ActionCore(int8(uint8 (actionType)), int8(uint8 ( actionTarget)), int8(uint8 (witchType)), 0);
+        ActionCore(actionType, actionTarget, witchType, 0);
     }
 
-    function ActionCore(int8 actionType, int8 actionTarget, int8 witchType, int8 actionLevel) private
+    function ActionCore(uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
     {
         require(actionType >= 0 && actionType <= 3, "Unknown action");
         if (actionType == FOOD)
@@ -429,7 +222,7 @@ contract zkWitches {
         {
             require(slotByAddress(msg.sender) != actionTarget, "Cannot target yourself");
             require(actionTarget >=0 && actionTarget <= 3, "Must target a existing player");
-            require(getPlayer(actionTarget).isAlive, "Cannot target a dead player");
+            require(tgs.players[actionTarget].isAlive, "Cannot target a dead player");
 
             // TODO Require enough resources
             // TODO Action
@@ -439,7 +232,7 @@ contract zkWitches {
         {
             require(slotByAddress(msg.sender) != actionTarget, "Cannot target yourself");
             require(actionTarget >=0 && actionTarget <= 3, "Must target a existing player");
-            require(getPlayer(actionTarget).isAlive, "Cannot target a dead player");
+            require(tgs.players[actionTarget].isAlive, "Cannot target a dead player");
 
             // TODO Require enough resources
             // TODO Action
@@ -463,26 +256,24 @@ contract zkWitches {
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
-        int8 slot = slotByAddress(msg.sender);
+        uint8 slot = slotByAddress(msg.sender);
 
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE, "Not waiting for a player response to accusation");
         require(tgs.shared.playerSlotWaiting == slot, "Not your response.");
 
         // Check proof inputs match contract state
 
-        PlayerState memory player = getPlayer(slot);
-
-        require(player.handCommitment == input[0], "Hand commitments do not match");
+        require(tgs.players[slot].handCommitment == input[0], "Hand commitments do not match");
 
         // TODO: We don't need WitchAlive for Accusation Responses because we check if the accusation is valid on the accuser's step.
         // It can be removed from the circuit and contract.
 
-        require(getWitchAlive(player,0) == int8(uint8 (input[1])), "Witch 0 Alive does not match");
-        require(getWitchAlive(player,1) == int8(uint8 (input[2])), "Witch 1 Alive does not match");
-        require(getWitchAlive(player,2) == int8(uint8 (input[3])), "Witch 2 Alive does not match");
-        require(getWitchAlive(player,3) == int8(uint8 (input[4])), "Witch 3 Alive does not match");
+        for (uint i=0; i<4; i++)
+        {   
+            require(tgs.players[slot].WitchAlive[i] == input[1+i], "Witch Alive does not match for index ");
+        }
 
-        require(tgs.shared.accusationWitchType == int8(uint8 (input[5])), "Responding to wrong accusation type");
+        require(tgs.shared.accusationWitchType == uint8(input[5]), "Responding to wrong accusation type");
 
         require(INWVerifier(nw_verifierAddr).verifyProof(a, b, c, input), "Invalid nowitch proof");
 
@@ -493,13 +284,11 @@ contract zkWitches {
     function RespondAccusation_YesWitch() public
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
-        
-        int8 slot = slotByAddress(msg.sender);
 
-        RespondAccusation_YesWitch_Inner(slot);
+        RespondAccusation_YesWitch_Inner(slotByAddress(msg.sender));
     }
 
-    function RespondAccusation_YesWitch_Inner(int8 slot) private
+    function RespondAccusation_YesWitch_Inner(uint8 slot) private
     {
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE, "Not waiting for a player response to accusation");
         require(tgs.shared.playerSlotWaiting == slot, "Not your response.");
@@ -514,26 +303,24 @@ contract zkWitches {
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
-        int8 slot = slotByAddress(msg.sender);
-
-        ForceLoss(slot);
+        ForceLoss(slotByAddress(msg.sender));
     }
 
     function KickCurrentPlayer() public
     {
         // TODO Check if player has been waiting too long
-        int8 slot = -1;
+        uint8 slot = INVALID_SLOT;
         if (false) 
         {
             ForceLoss(slot);
         }
     }
 
-    function ForceLoss(int8 slot) private
+    function ForceLoss(uint8 slot) private
     {
         require(tgs.shared.stateEnum != GAME_STARTING, "A Player cannot lose before the game starts."); // TODO fix - just need to write some logic for this case
         require(tgs.shared.stateEnum != GAME_OVER, "The game is already over.");
-        require(getPlayer(slot).isAlive, "Player is already dead.");
+        require(tgs.players[slot].isAlive, "Player is already dead.");
 
         // If the player is active we need to advance the game and THEN kick the player
 

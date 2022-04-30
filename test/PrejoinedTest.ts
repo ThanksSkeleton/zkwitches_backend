@@ -119,50 +119,37 @@ describe("zkWitches Contract - Pre Joined Game", function () {
                 current_block: 0,
                 current_sequence_number: 0
             },
-            address0: "0x8ba1f109551bd432803012645ac136ddd64dba72",
-            address1: "0x8ba1f109551bd432803012645ac136ddd64dba71",
-            address2: "0x8ba1f109551bd432803012645ac136ddd64dba70",
-            address3: "0x8ba1f109551bd432803012645ac136ddd64dba69",
-            player0: {
+            addresses: ["0x8ba1f109551bd432803012645ac136ddd64dba72","0x8ba1f109551bd432803012645ac136ddd64dba71","0x8ba1f109551bd432803012645ac136ddd64dba70", "0x8ba1f109551bd432803012645ac136ddd64dba69"],
+            players: [
+            {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive0: 1,
-                WitchAlive1: 1,
-                WitchAlive2: 1,
-                WitchAlive3: 1
+                WitchAlive: [1,1,1,1]
             },
-            player1: {
+            {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive0: 1,
-                WitchAlive1: 1,
-                WitchAlive2: 1,
-                WitchAlive3: 1
+                WitchAlive: [1,1,1,1]
             },
-            player2: {
+            {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive0: 1,
-                WitchAlive1: 1,
-                WitchAlive2: 1,
-                WitchAlive3: 1
+                WitchAlive: [1,1,1,1]
             },
-            player3: {
+            {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive0: 1,
-                WitchAlive1: 1,
-                WitchAlive2: 1,
-                WitchAlive3: 1
+                WitchAlive: [1,1,1,1]
             }
+            ]
         };
 
         await expect(zkWitches.DEBUG_SetGameState(inputTGS)).to.not.be.rejected;

@@ -19,14 +19,14 @@ describe("zkWitches Contract - Joined Game", function () {
     let nw_Verifier: NWVerifier;
     let zkWitches: ZkWitches;
 
+    // Players
     let p1 : Signer;
     let p2 : Signer;
     let p3 : Signer;
     let p4 : Signer;
 
-    let p5 : Signer;
-
-
+    // Not a player
+    let stranger : Signer;
 
     beforeEach(async function () {
         let fact = await ethers.getContractFactory("contracts/HandCommitment_verifier.sol:Verifier");
@@ -50,7 +50,7 @@ describe("zkWitches Contract - Joined Game", function () {
         p2 = px2;
         p3 = px3;
         p4 = px4;
-        p5 = px5;
+        stranger = px5;
 
         var hccall_array = JSON.parse("[" + fs.readFileSync(hccall) + "]");
         for(let player of [p1, p2, p3, p4]) 
@@ -72,7 +72,7 @@ describe("zkWitches Contract - Joined Game", function () {
     it("5th player cannot join", async function() 
     {
         var hccall_array = JSON.parse("[" + fs.readFileSync(hccall) + "]");
-        await expect(zkWitches.connect(p5).JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.be.rejected;
+        await expect(zkWitches.connect(stranger).JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.be.rejected;
     });
 
     it("Player 1 can make an proof based action", async function() 
