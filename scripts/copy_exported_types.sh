@@ -18,7 +18,10 @@ cp circuits/build/ValidMove/circuit_final.zkey export/ValidMove/circuit_final.zk
 cp circuits/*.ts export
 cp circuits/*.json export
 
-# export solidity generated types
+# export solidity generated typescript bindings
 mkdir -p export
 cp typechain-types/zkWitches.sol/ZkWitches.ts export/ZkWitches.ts
 cp typechain-types/common.ts export/common.ts
+
+# export ABI
+cp artifacts/contracts/zkWitches.sol/zkWitches.json export/zkWitches.json
