@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.4;
 
-interface IHCVerifier {
+internal interface IHCVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
@@ -12,7 +12,7 @@ interface IHCVerifier {
     ) external view returns (bool);
 }
 
-interface INWVerifier {
+internal interface INWVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
@@ -21,7 +21,7 @@ interface INWVerifier {
     ) external view returns (bool);
 }
 
-interface IVMVerifier {
+internal interface IVMVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
@@ -82,7 +82,7 @@ contract zkWitches {
         uint8 food;
         uint8 lumber;
 
-        uint8[4] WitchAlive; // TODO bool?
+        bool[4] WitchAlive; // TODO bool?
     }
 
 
@@ -92,12 +92,12 @@ contract zkWitches {
     address public vm_verifierAddr;
     address public nw_verifierAddr;
 
-    function GetTGS() public view returns (TotalGameState memory) 
+    function GetTGS() external view returns (TotalGameState memory) 
     {
         return tgs;
     }
 
-    function slotByAddress(address a) public view returns (uint8) 
+    function slotByAddress(address a) internal view returns (uint8) 
     {
         for (uint i=0; i<tgs.shared.currentNumberOfPlayers; i++)
         {   
@@ -115,7 +115,7 @@ contract zkWitches {
         nw_verifierAddr = nw_verifier;
     }
 
-    function DEBUG_SetGameState(TotalGameState calldata inputTgs) public 
+    function DEBUG_SetGameState(TotalGameState calldata inputTgs) external 
     {
         tgs = inputTgs;
     }
@@ -131,7 +131,7 @@ contract zkWitches {
         // proof output                  
         // signal output Hash;
         uint[1] memory input
-    ) public
+    ) external
     {
         require(slotByAddress(msg.sender) == INVALID_SLOT, "You are already in the game");
         require(tgs.shared.stateEnum == GAME_STARTING, "Game has already started");
@@ -172,7 +172,7 @@ contract zkWitches {
         // signal input citizenType;
         // signal input requiredCitizenCount;
         uint[7] memory input
-    ) public 
+    ) external 
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
@@ -193,7 +193,7 @@ contract zkWitches {
         ActionCore(uint8(input[5]), actionTarget, uint8(input[6]), witchType);
     }
 
-    function ActionNoProof(uint8 actionType, uint8 actionTarget, uint8 witchType) public 
+    function ActionNoProof(uint8 actionType, uint8 actionTarget, uint8 witchType) external 
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
@@ -207,7 +207,7 @@ contract zkWitches {
 
     function ActionCore(uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
     {
-        require(actionType >= 0 && actionType <= 3, "Unknown action");
+        require(actionType >= FOOD && actionType <= INQUISITOR, "Unknown action");
         if (actionType == FOOD)
         {
             // TODO Action
@@ -252,7 +252,7 @@ contract zkWitches {
         // signal input WitchAlive[4]; 
         // signal input citizenType;
         uint[6] memory input
-    ) public
+    ) external
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
@@ -281,14 +281,14 @@ contract zkWitches {
         // TODO Advance Game State
     }
 
-    function RespondAccusation_YesWitch() public
+    function RespondAccusation_YesWitch() external
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
 
         RespondAccusation_YesWitch_Inner(slotByAddress(msg.sender));
     }
 
-    function RespondAccusation_YesWitch_Inner(uint8 slot) private
+    function RespondAccusation_YesWitch_Inner(uint8 slot) internal
     {
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE, "Not waiting for a player response to accusation");
         require(tgs.shared.playerSlotWaiting == slot, "Not your response.");
@@ -299,14 +299,14 @@ contract zkWitches {
 
     // Game Loss and Surrender
 
-    function Surrender() public 
+    function Surrender() external 
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
         ForceLoss(slotByAddress(msg.sender));
     }
 
-    function KickCurrentPlayer() public
+    function KickCurrentPlayer() external
     {
         // TODO Check if player has been waiting too long
         uint8 slot = INVALID_SLOT;
@@ -316,7 +316,7 @@ contract zkWitches {
         }
     }
 
-    function ForceLoss(uint8 slot) private
+    function ForceLoss(uint8 slot) internal
     {
         require(tgs.shared.stateEnum != GAME_STARTING, "A Player cannot lose before the game starts."); // TODO fix - just need to write some logic for this case
         require(tgs.shared.stateEnum != GAME_OVER, "The game is already over.");
