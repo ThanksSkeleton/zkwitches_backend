@@ -83,6 +83,6 @@ describe("zkWitches Contract - Joined Game", function () {
 
     it("Player 1 can make an normal action", async function() 
     {
-        await expect(zkWitches.connect(p1).ActionNoProof(0,0, 0)).to.not.be.rejected;        
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
     });
 });

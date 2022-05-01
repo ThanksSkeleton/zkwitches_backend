@@ -17,7 +17,7 @@ interface INWVerifier {
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[6] memory input
+        uint256[2] memory input
     ) external view returns (bool);
 }
 
@@ -250,9 +250,8 @@ contract zkWitches {
         uint[2] memory c,
         // proof publics    
         // signal input ExpectedHash;
-        // signal input WitchAlive[4]; 
         // signal input citizenType;
-        uint[6] memory input
+        uint[2] memory input
     ) external
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
@@ -266,15 +265,7 @@ contract zkWitches {
 
         require(tgs.players[slot].handCommitment == input[0], "Hand commitments do not match");
 
-        // TODO: We don't need WitchAlive for Accusation Responses because we check if the accusation is valid on the accuser's step.
-        // It can be removed from the circuit and contract.
-
-        for (uint i=0; i<4; i++)
-        {   
-            require(tgs.players[slot].WitchAlive[i] == (input[1+i] > 0), "Witch Alive does not match for index ");
-        }
-
-        require(tgs.shared.accusationWitchType == uint8(input[5]), "Responding to wrong accusation type");
+        require(tgs.shared.accusationWitchType == uint8(input[1]), "Responding to wrong accusation type");
 
         require(INWVerifier(nw_verifierAddr).verifyProof(a, b, c, input), "Invalid nowitch proof");
 

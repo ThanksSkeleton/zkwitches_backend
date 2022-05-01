@@ -16,7 +16,6 @@ template NoWitch()
 
 	// public
     signal input ExpectedHash;
-    signal input WitchAlive[4]; 
     signal input citizenType;
 
 	// convert citizenType to binary for the muxes
@@ -33,20 +32,6 @@ template NoWitch()
     WitchPresentMux.s[0] <== citizenTypeToBinary.out[0];
     WitchPresentMux.s[1] <== citizenTypeToBinary.out[1];
 
-    // use MUXes to do array indexing 
-	component WitchAliveMux = Mux2();
-	WitchAliveMux.c[0] <== WitchAlive[0];
-	WitchAliveMux.c[1] <== WitchAlive[1];
-	WitchAliveMux.c[2] <== WitchAlive[2];
-	WitchAliveMux.c[3] <== WitchAlive[3];
-
-    WitchAliveMux.s[0] <== citizenTypeToBinary.out[0];
-    WitchAliveMux.s[1] <== citizenTypeToBinary.out[1];
-
-    component witchPresentAndAlive = AND();
-    witchPresentAndAlive.a <== WitchPresentMux.out;
-    witchPresentAndAlive.b <== WitchAliveMux.out;
-
     component hh = HandHash();
     hh.CitizenCount[0] <== CitizenCount[0];
     hh.CitizenCount[1] <== CitizenCount[1];
@@ -61,7 +46,7 @@ template NoWitch()
     hh.HandSalt <== HandSalt;
 
     hh.Hash === ExpectedHash;
-    witchPresentAndAlive.out === 0;
+    WitchPresentMux.out === 0;
 }
 
-component main {public [ExpectedHash, WitchAlive, citizenType]} = NoWitch();
+component main {public [ExpectedHash, citizenType]} = NoWitch();
