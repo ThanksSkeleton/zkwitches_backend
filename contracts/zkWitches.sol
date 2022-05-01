@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.4;
 
-internal interface IHCVerifier {
+interface IHCVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
@@ -12,7 +12,7 @@ internal interface IHCVerifier {
     ) external view returns (bool);
 }
 
-internal interface INWVerifier {
+interface INWVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
@@ -21,7 +21,7 @@ internal interface INWVerifier {
     ) external view returns (bool);
 }
 
-internal interface IVMVerifier {
+interface IVMVerifier {
     function verifyProof(
         uint256[2] memory a,
         uint256[2][2] memory b,
@@ -149,7 +149,7 @@ contract zkWitches {
         tgs.players[playerSlot].food = STARTING_LUMBER;
         for (uint i=0; i<4; i++)
         {   
-            tgs.players[playerSlot].WitchAlive[i] = 1;
+            tgs.players[playerSlot].WitchAlive[i] = true;
         }
 
         // TODO: Advance game state if full
@@ -185,7 +185,8 @@ contract zkWitches {
 
         for (uint i=0; i<4; i++)
         {   
-            require(tgs.players[slot].WitchAlive[i] == uint8(input[1+i]), "Witch Alive does not match for index"); // TODO better message
+
+            require(tgs.players[slot].WitchAlive[i] == (input[1+i] > 0), "Witch Alive does not match for index"); // TODO better message
         }
 
         require(IVMVerifier(vm_verifierAddr).verifyProof(a, b, c, input), "Invalid validmove proof");
@@ -270,7 +271,7 @@ contract zkWitches {
 
         for (uint i=0; i<4; i++)
         {   
-            require(tgs.players[slot].WitchAlive[i] == input[1+i], "Witch Alive does not match for index ");
+            require(tgs.players[slot].WitchAlive[i] == (input[1+i] > 0), "Witch Alive does not match for index ");
         }
 
         require(tgs.shared.accusationWitchType == uint8(input[5]), "Responding to wrong accusation type");

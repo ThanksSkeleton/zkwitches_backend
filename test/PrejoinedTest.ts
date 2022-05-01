@@ -126,28 +126,28 @@ describe("zkWitches Contract - Pre Joined Game", function () {
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive: [1,1,1,1]
+                WitchAlive: [true,true,true,true]
             },
             {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive: [1,1,1,1]
+                WitchAlive: [true,true,true,true]
             },
             {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive: [1,1,1,1]
+                WitchAlive: [true,true,true,true]
             },
             {
                 isAlive: false,
                 handCommitment: 0,
                 food: 0,
                 lumber: 0,
-                WitchAlive: [1,1,1,1]
+                WitchAlive: [true,true,true,true]
             }
             ]
         };
