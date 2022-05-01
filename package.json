@@ -4,7 +4,7 @@
   "description": "Social Deduction Game using ZK",
   "scripts": {
     "compile:contracts": "npx hardhat compile --force",
-    "copyartifacts" : "bash scripts/copy_exported_types.sh",
+    "copyartifacts": "bash scripts/copy_exported_types.sh",
     "develop": "npx hardhat node",
     "deploy:localhost": "npx hardhat deploy --tags complete",
     "test": "npx hardhat test",
@@ -38,6 +38,7 @@
     "chai": "^4.3.6",
     "circomlib": "^2.0.3",
     "circomlibjs": "^0.1.2",
+    "dotenv": "^16.0.0",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.4",
     "hardhat": "^2.9.3",

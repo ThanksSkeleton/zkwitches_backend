@@ -1,17 +1,20 @@
-import '@typechain/hardhat'
-import ('@nomiclabs/hardhat-ethers')
-import ('@nomiclabs/hardhat-waffle')
-import ("hardhat-deploy");
-import ("hardhat-gas-reporter");
-import ('fs');
+import 'dotenv/config';
+import {HardhatUserConfig} from 'hardhat/types';
+import 'hardhat-deploy';
+import '@nomiclabs/hardhat-ethers';
+import 'hardhat-gas-reporter';
+import '@typechain/hardhat';
+
 const { testkey, productionkey } = require("./private_keys.json");
 
-module.exports = {
+const config: HardhatUserConfig = {
     solidity: {
         version: "0.8.4",
-        optimizer: {
-            enabled: true,
-            runs: 200
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 200
+            }
         }
     },
     networks: {
@@ -42,3 +45,4 @@ module.exports = {
         timeout: 1000000
     }
 };
+export default config;

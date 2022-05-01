@@ -1,5 +1,11 @@
-module.exports = async ({ getNamedAccounts, deployments }) => {
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
+import {parseEther} from 'ethers/lib/utils';
+
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+    const { deployments, getNamedAccounts } = hre;
     const { deploy } = deployments;
+
     const { deployer } = await getNamedAccounts();
 	
     const hcverifier = await deploy('', {
@@ -7,11 +13,15 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         contract: 'contracts/HandCommitment_verifier.sol:Verifier',
         log: true
     });
+
+    console.log("Deploying vm");
+
 	const vmverifier = await deploy('', {
         from: deployer,
         contract:'contracts/ValidMove_verifier.sol:Verifier',
         log: true
     });
+
 	const nwverifier = await deploy('', {
         from: deployer,
         contract:'contracts/NoWitch_verifier.sol:Verifier',
@@ -24,4 +34,5 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         args: [hcverifier.address, vmverifier.address, nwverifier.address]
     });
 };
-module.exports.tags = ['complete'];
+export default func;
+func.tags = ['zkWitches'];
