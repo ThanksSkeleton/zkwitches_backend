@@ -115,9 +115,12 @@ describe("zkWitches Contract - Pre Joined Game", function () {
                 currentNumberOfPlayers: 0,
                 playerAccusing: 0,
                 accusationWitchType: 0,
+
                 previous_action_game_block: 0,
                 current_block: 0,
-                current_sequence_number: 0
+                current_sequence_number: 0,
+                
+                currentGameCount: 0
             },
             addresses: ["0x8ba1f109551bd432803012645ac136ddd64dba72","0x8ba1f109551bd432803012645ac136ddd64dba71","0x8ba1f109551bd432803012645ac136ddd64dba70", "0x8ba1f109551bd432803012645ac136ddd64dba69"],
             players: [

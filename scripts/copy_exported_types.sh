@@ -1,27 +1,29 @@
 #!/bin/bash
 
 mkdir -p export
+mkdir -p export/src/import
+mkdir -p export/public/import
 
 # Export js folders + zkeys
-mkdir -p export/HandCommitment
-cp circuits/build/HandCommitment_js/*.* export/HandCommitment
-cp circuits/build/HandCommitment/circuit_final.zkey export/HandCommitment/circuit_final.zkey
+mkdir -p export/public/import/HandCommitment
+cp circuits/build/HandCommitment_js/*.wasm export/public/import/HandCommitment
+cp circuits/build/HandCommitment/circuit_final.zkey export/public/import/HandCommitment/circuit_final.zkey
 
-mkdir -p export/NoWitch
-cp circuits/build/NoWitch_js/*.* export/NoWitch
-cp circuits/build/NoWitch/circuit_final.zkey export/NoWitch/circuit_final.zkey
+mkdir -p export/public/import/NoWitch
+cp circuits/build/NoWitch_js/*.wasm export/public/import/NoWitch
+cp circuits/build/NoWitch/circuit_final.zkey export/public/import/NoWitch/circuit_final.zkey
 
-mkdir -p export/ValidMove
-cp circuits/build/ValidMove_js/*.* export/ValidMove
-cp circuits/build/ValidMove/circuit_final.zkey export/ValidMove/circuit_final.zkey
+mkdir -p export/public/import/ValidMove
+cp circuits/build/ValidMove_js/*.wasm export/public/import/ValidMove
+cp circuits/build/ValidMove/circuit_final.zkey export/public/import/ValidMove/circuit_final.zkey
 # export circuit input types
-cp circuits/*.ts export
-cp circuits/*.json export
+cp circuits/*.ts export/src/import
+cp circuits/*.json export/src/import
 
 # export solidity generated typescript bindings
-mkdir -p export
-cp typechain-types/zkWitches.sol/ZkWitches.ts export/ZkWitches.ts
-cp typechain-types/common.ts export/common.ts
+mkdir -p export/src/import/ZkWitches
+cp typechain-types/zkWitches.sol/ZkWitches.ts export/src/import/ZkWitches/ZkWitches.ts
+cp typechain-types/common.ts export/src/import/common.ts
 
 # export ABI
-cp artifacts/contracts/zkWitches.sol/zkWitches.json export/zkWitches.json
+cp artifacts/contracts/zkWitches.sol/zkWitches.json export/public/import/zkWitches.json

@@ -72,6 +72,8 @@ contract zkWitches {
         uint previous_action_game_block;
         uint current_block;
         uint current_sequence_number;
+
+        int currentGameCount;
     }
 
     struct PlayerState 
@@ -140,19 +142,22 @@ contract zkWitches {
         
         uint256 playerSlot = tgs.shared.currentNumberOfPlayers;
 
-        tgs.shared.currentNumberOfPlayers++;
-
         tgs.addresses[playerSlot] = msg.sender;
         tgs.players[playerSlot].isAlive = true;
         tgs.players[playerSlot].handCommitment = input[0];
         tgs.players[playerSlot].food = STARTING_FOOD;
-        tgs.players[playerSlot].food = STARTING_LUMBER;
+        tgs.players[playerSlot].lumber = STARTING_LUMBER;
         for (uint i=0; i<4; i++)
         {   
             tgs.players[playerSlot].WitchAlive[i] = true;
         }
 
-        // TODO: Advance game state if full
+        tgs.shared.currentNumberOfPlayers++;
+
+        if (tgs.shared.currentNumberOfPlayers == 4)
+        {
+            tgs.shared.stateEnum = WAITING_FOR_PLAYER_TURN;
+        }
     }
 
     // Game Action Stuff
@@ -185,13 +190,12 @@ contract zkWitches {
 
         for (uint i=0; i<4; i++)
         {   
-
             require(tgs.players[slot].WitchAlive[i] == (input[1+i] > 0), "Witch Alive does not match for index"); // TODO better message
         }
 
         require(IVMVerifier(vm_verifierAddr).verifyProof(a, b, c, input), "Invalid validmove proof");
 
-        ActionCore(uint8(input[5]), actionTarget, uint8(input[6]), witchType);
+        ActionCore(slot, uint8(input[5]), actionTarget, uint8(input[6]), witchType);
     }
 
     function ActionNoProof(uint8 actionType, uint8 actionTarget, uint8 witchType) external 
@@ -203,21 +207,21 @@ contract zkWitches {
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_TURN, "Not waiting for a player action");
         require(tgs.shared.playerSlotWaiting == slot, "Not your turn.");
 
-        ActionCore(actionType, actionTarget, witchType, 0);
+        ActionCore(slot, actionType, actionTarget, witchType, 0);
     }
 
-    function ActionCore(uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
+    function ActionCore(uint8 playerSlot, uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
     {
         require(actionType >= FOOD && actionType <= INQUISITOR, "Unknown action");
         if (actionType == FOOD)
         {
-            // TODO Action
-            // TODO Advance Game State
+            addResources(playerSlot, actionLevel+1, 0);
+            Advance();
         } 
         else if (actionType == LUMBER) 
         {
-            // TODO Action
-            // TODO Advance Game State
+            addResources(playerSlot, 0, actionLevel+1);
+            Advance();
         } 
         else if (actionType == BRIGAND)
         {
@@ -225,9 +229,16 @@ contract zkWitches {
             require(actionTarget >=0 && actionTarget <= 3, "Must target a existing player");
             require(tgs.players[actionTarget].isAlive, "Cannot target a dead player");
 
-            // TODO Require enough resources
-            // TODO Action
-            // TODO Advance Game State
+            uint8[8] memory brigandTrades = [2,0, 0,2, 0,0, 0,0];
+            uint8[8] memory brigandSteal =  [0,1, 1,0, 0,1, 1,0];
+
+            takeResources(playerSlot, brigandTrades[actionLevel*2], brigandTrades[actionLevel*2+1]);
+            addResources(playerSlot,  brigandSteal[actionLevel*2],  brigandSteal[actionLevel*2+1]);
+
+            addResources(actionTarget, brigandTrades[actionLevel*2], brigandTrades[actionLevel*2+1]);
+            takeResources(actionTarget,  brigandSteal[actionLevel*2],  brigandSteal[actionLevel*2+1]);
+
+            Advance();
         } 
         else if (actionType == INQUISITOR) 
         {
@@ -235,10 +246,29 @@ contract zkWitches {
             require(actionTarget >=0 && actionTarget <= 3, "Must target a existing player");
             require(tgs.players[actionTarget].isAlive, "Cannot target a dead player");
 
-            // TODO Require enough resources
-            // TODO Action
-            // TODO Advance Game State to WAITING_FOR_PLAYER_ACCUSATION_RESPONSE
+            uint8[8] memory inquisitionCosts = [3,3, 2,2, 1,1, 0,0];
+
+            takeResources(playerSlot, inquisitionCosts[actionLevel*2], inquisitionCosts[actionLevel*2+1]);
+
+            tgs.shared.playerAccusing = playerSlot;
+            tgs.shared.accusationWitchType = witchType;
+            tgs.shared.playerSlotWaiting = actionTarget;
+            tgs.shared.stateEnum = WAITING_FOR_PLAYER_ACCUSATION_RESPONSE;
         }
+    }
+
+    function addResources(uint8 slot, uint8 food, uint8 lumber) private
+    {
+        tgs.players[slot].food += food;
+        tgs.players[slot].lumber += lumber;
+    }
+
+    function takeResources(uint8 slot, uint8 food, uint8 lumber) private
+    {
+        require(tgs.players[slot].food >= food, "too little food");
+        require(tgs.players[slot].lumber >= lumber, "too little lumber");
+        tgs.players[slot].food -= food;
+        tgs.players[slot].lumber -= lumber;
     }
 
     // Witch Accusations 
@@ -269,8 +299,8 @@ contract zkWitches {
 
         require(INWVerifier(nw_verifierAddr).verifyProof(a, b, c, input), "Invalid nowitch proof");
 
-        // TODO Apply Penalties
-        // TODO Advance Game State
+        // no reward
+        Advance();
     }
 
     function RespondAccusation_YesWitch() external
@@ -278,6 +308,7 @@ contract zkWitches {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
 
         RespondAccusation_YesWitch_Inner(slotByAddress(msg.sender));
+        Advance();
     }
 
     function RespondAccusation_YesWitch_Inner(uint8 slot) internal
@@ -285,8 +316,14 @@ contract zkWitches {
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE, "Not waiting for a player response to accusation");
         require(tgs.shared.playerSlotWaiting == slot, "Not your response.");
 
-        // TODO Apply Penalties
-        // TODO Advance Game State
+        addResources(tgs.shared.playerAccusing, 2, 2);
+        tgs.players[slot].WitchAlive[tgs.shared.playerAccusing] = false;
+        if (tgs.players[slot].food >= 2 && tgs.players[slot].lumber >=2)
+        {
+            takeResources(slot, 2, 2);
+        } else {
+            Die(slot);
+        }
     }
 
     // Game Loss and Surrender
@@ -315,20 +352,70 @@ contract zkWitches {
         require(tgs.players[slot].isAlive, "Player is already dead.");
 
         // If the player is active we need to advance the game and THEN kick the player
+        Die(slot);
 
         if (tgs.shared.stateEnum == WAITING_FOR_PLAYER_TURN && tgs.shared.playerSlotWaiting == slot) 
         {
-            // TODO Special "Pass" Action
-            // TODO Advance Game State
+            Advance();
         } 
         else if (tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE && tgs.shared.playerSlotWaiting == slot) 
         {
             RespondAccusation_YesWitch_Inner(slot);
+            Advance();
+        } 
+        else 
+        {
+            // Don't need to advance turn, but check victory
+            CheckVictory();
+        }
+    }
+
+    function Die(uint8 slot) internal
+    {
+        tgs.players[slot].isAlive = false;
+    }
+
+    function Advance() internal
+    {
+        if (tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE) 
+        {
+            tgs.shared.playerSlotWaiting = (tgs.shared.playerAccusing+1) % 4;
+            tgs.shared.stateEnum = WAITING_FOR_PLAYER_TURN;
+            tgs.shared.playerAccusing = INVALID_SLOT;
+            tgs.shared.accusationWitchType = INVALID_SLOT;
+        } else {
+            tgs.shared.playerSlotWaiting = (tgs.shared.playerSlotWaiting+1) % 4;
+            tgs.shared.stateEnum = WAITING_FOR_PLAYER_TURN;
         }
 
-        // TODO Mark Surrender
-        // TODO Check Victory
+        if (!tgs.players[tgs.shared.playerSlotWaiting].isAlive) 
+        {
+            Advance();
+        }
+        CheckVictory();
     }
+
+    function CheckVictory() internal
+    {
+        uint dead = 0;
+        for (uint i=0; i<4; i++)
+        {   
+            if (tgs.players[i].food >= 10 && tgs.players[i].lumber >= 10) 
+            {
+                tgs.shared.stateEnum = GAME_OVER;
+            } 
+            if (!tgs.players[i].isAlive) 
+            { 
+                dead++; 
+            }
+        }
+        if (dead >= 3) 
+        {
+            tgs.shared.stateEnum = GAME_OVER;
+        }
+    }
+
+    // TODO ADD RESET
 
     // Game State Advancement
 }

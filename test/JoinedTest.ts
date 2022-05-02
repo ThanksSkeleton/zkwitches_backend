@@ -11,6 +11,7 @@ import { ZkWitches } from "../typechain-types/zkWitches.sol";
 import chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
+chai.config.includeStack = true;
 
 describe("zkWitches Contract - Joined Game", function () {
 
@@ -84,5 +85,103 @@ describe("zkWitches Contract - Joined Game", function () {
     it("Player 1 can make an normal action", async function() 
     {
         await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+    });
+
+    it("Players can go in order", async function() 
+    {        
+        let p_players : Signer[]= [p1, p2, p3, p4, p1];
+        for (let i = 0; i< p_players.length; i++)
+        {
+            await expect(zkWitches.connect(p_players[i]).ActionNoProof(0,0,0)).to.not.be.rejected;        
+        }
+    });
+
+    it("Players can't go out of order", async function() 
+    {
+        // Not their turns
+        await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.be.rejected;
+        await expect(zkWitches.connect(p3).ActionNoProof(0,0,0)).to.be.rejected;        
+        // His turn
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+        // Now their turns
+        await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.not.be.rejected;
+        await expect(zkWitches.connect(p3).ActionNoProof(0,0,0)).to.not.be.rejected;  
+    });
+
+    it("3 Players can surrender and the game ends", async function() 
+    {
+        let p_surrenders : Signer[]= [p2, p3, p4];
+        for (let i = 0; i< p_surrenders.length; i++)
+        {
+            await expect(zkWitches.connect(p_surrenders[i]).Surrender()).to.not.be.rejected;        
+        }
+
+        let tgs = await zkWitches.connect(p1).GetTGS();
+        expect(tgs.shared.stateEnum).to.equal(3);   
+
+        await expect(zkWitches.connect(p1).Surrender()).to.be.rejected;
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.be.rejected;          
+    });
+
+    it("Game continues when a player surrenders on their turn", async function() 
+    {
+        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.not.be.rejected;        
+    });
+
+    it("Game ends due to resources", async function() 
+    {
+        // They leave
+        await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p4).Surrender()).to.not.be.rejected; 
+
+        // start (2,2), (2,2)
+        // both farm 8 food ((10, 2), (10, 2))
+        for (let i = 0; i< 8; i++)
+        {
+            await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+            await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.not.be.rejected; 
+        }
+
+        // p1 farm 8 food, p2 gets 8 lumber ((18, 2), (10, 10))
+        for (let i = 0; i< 8; i++)
+        {
+            await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+            await expect(zkWitches.connect(p2).ActionNoProof(1,0,0)).to.not.be.rejected; 
+        }
+        // p2 is the winner at the end of his turn
+
+        let tgs = await zkWitches.connect(p1).GetTGS();        
+        expect(tgs.shared.stateEnum).to.equal(3);
+        
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.be.rejected;        
+    });
+
+    it("Witch Accusation Duel", async function() 
+    {
+        // They leave
+        await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p4).Surrender()).to.not.be.rejected; 
+
+        // Gather some resources
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.not.be.rejected; 
+        await expect(zkWitches.connect(p1).ActionNoProof(1,0,0)).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).ActionNoProof(1,0,0)).to.not.be.rejected; 
+        // (3,3), (3,3)
+        // I, p1, accuse p2 of having a farmer witch
+        await expect(zkWitches.connect(p1).ActionNoProof(3,1,0)).to.not.be.rejected;   
+
+        var nwcall_array = JSON.parse("[" + fs.readFileSync(nwcall) + "]");
+        // I, p2 prove that I don't
+        await expect(zkWitches.connect(p2).RespondAccusation_NoWitch(nwcall_array[0], nwcall_array[1], nwcall_array[2], nwcall_array[3])).to.not.be.rejected;
+        // I, p2, accuse p1 of having a lumberjack witch
+        await expect(zkWitches.connect(p2).ActionNoProof(3,0,1)).to.not.be.rejected;
+        // I, p1, have to admit it.
+        await expect(zkWitches.connect(p1).RespondAccusation_YesWitch()).to.not.be.rejected;   
+   
+        // Game Over.
+        let tgs = await zkWitches.connect(p1).GetTGS();        
+        expect(tgs.shared.stateEnum).to.equal(3);
     });
 });
