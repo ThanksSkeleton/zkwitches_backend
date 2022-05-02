@@ -3,7 +3,7 @@ import chai = require("chai");
 
 import { ethers } from "hardhat";
 import * as fs from "fs";
-import { ContractFactory, Contract } from "ethers";
+import { ContractFactory, Contract, Signer } from "ethers";
 import { Verifier as HCVerifier } from "../typechain-types/HandCommitment_verifier.sol";
 import { Verifier as NWVerifier } from "../typechain-types/NoWitch_verifier.sol";
 import { Verifier as VMVerifier } from "../typechain-types/ValidMove_verifier.sol";
@@ -18,6 +18,9 @@ describe("zkWitches Contract - Pre Joined Game", function () {
     let vm_Verifier: VMVerifier;
     let nw_Verifier: NWVerifier;
     let zkWitches: ZkWitches;
+
+    let owner : Signer;
+    let notOwner : Signer;
 
     beforeEach(async function () {
         let fact = await ethers.getContractFactory("contracts/HandCommitment_verifier.sol:Verifier");
@@ -36,7 +39,7 @@ describe("zkWitches Contract - Pre Joined Game", function () {
         zkWitches = await fact4.deploy(hc_Verifier.address, vm_Verifier.address, nw_Verifier.address) as ZkWitches;
         await zkWitches.deployed();
 
-        // balance = await signers[0].getBalance();
+        [owner, notOwner] = await ethers.getSigners();
     });
 	
 
@@ -119,7 +122,7 @@ describe("zkWitches Contract - Pre Joined Game", function () {
                 previous_action_game_block: 0,
                 current_block: 0,
                 current_sequence_number: 0,
-                
+
                 currentGameCount: 0
             },
             addresses: ["0x8ba1f109551bd432803012645ac136ddd64dba72","0x8ba1f109551bd432803012645ac136ddd64dba71","0x8ba1f109551bd432803012645ac136ddd64dba70", "0x8ba1f109551bd432803012645ac136ddd64dba69"],
@@ -159,5 +162,57 @@ describe("zkWitches Contract - Pre Joined Game", function () {
         await expect(zkWitches.GetTGS()).to.not.be.rejected;
         let fetched = await zkWitches.GetTGS();
         expect(fetched.shared.stateEnum).to.be.eq(1);
+    }); 
+
+    it("TotalGameState Set only owner", async function() 
+    {
+        let inputTGS : ZkWitches.TotalGameStateStruct = {
+            shared: {
+                stateEnum: 1,
+                playerSlotWaiting: 0,
+                currentNumberOfPlayers: 0,
+                playerAccusing: 0,
+                accusationWitchType: 0,
+
+                previous_action_game_block: 0,
+                current_block: 0,
+                current_sequence_number: 0,
+                
+                currentGameCount: 0
+            },
+            addresses: ["0x8ba1f109551bd432803012645ac136ddd64dba72","0x8ba1f109551bd432803012645ac136ddd64dba71","0x8ba1f109551bd432803012645ac136ddd64dba70", "0x8ba1f109551bd432803012645ac136ddd64dba69"],
+            players: [
+            {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive: [true,true,true,true]
+            },
+            {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive: [true,true,true,true]
+            },
+            {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive: [true,true,true,true]
+            },
+            {
+                isAlive: false,
+                handCommitment: 0,
+                food: 0,
+                lumber: 0,
+                WitchAlive: [true,true,true,true]
+            }
+            ]
+        };
+
+        await expect(zkWitches.connect(notOwner).DEBUG_SetGameState(inputTGS)).to.be.rejected;
     }); 
 });
