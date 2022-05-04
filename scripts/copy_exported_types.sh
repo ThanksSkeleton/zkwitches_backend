@@ -26,4 +26,4 @@ cp typechain-types/zkWitches.sol/ZkWitches.ts export/src/import/ZkWitches/ZkWitc
 cp typechain-types/common.ts export/src/import/common.ts
 
 # export ABI
-cp artifacts/contracts/zkWitches.sol/zkWitches.json export/public/import/zkWitches.json
+cp artifacts/contracts/zkWitches.sol/zkWitches.json export/src/import/zkWitches.json

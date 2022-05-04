@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 // ZK Witches
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 pragma solidity ^0.8.4;
 
@@ -30,7 +31,7 @@ interface IVMVerifier {
     ) external view returns (bool);
 }
 
-contract zkWitches {
+contract zkWitches is Ownable {
 
     // Action Types
     uint8 constant FOOD = 0;
@@ -42,7 +43,6 @@ contract zkWitches {
     uint8 constant GAME_STARTING = 0;
     uint8 constant WAITING_FOR_PLAYER_TURN = 1;
     uint8 constant WAITING_FOR_PLAYER_ACCUSATION_RESPONSE = 2;
-    uint8 constant GAME_OVER = 3;
 
     uint8 constant INVALID_SLOT = 5;
 
@@ -73,7 +73,7 @@ contract zkWitches {
         uint current_block;
         uint current_sequence_number;
 
-        int currentGameCount;
+        int gameId;
     }
 
     struct PlayerState 
@@ -84,9 +84,14 @@ contract zkWitches {
         uint8 food;
         uint8 lumber;
 
-        bool[4] WitchAlive; // TODO bool?
+        bool[4] WitchAlive; 
     }
 
+    event GameStartEvent(int indexed gameId);
+    event JoinGameEvent(int indexed gameId, address indexed player, uint8 slot);
+    event ActionEvent(int indexed gameId, uint8 slot, uint8 action, uint8 target, uint8 witchType, uint8 actionLevel);
+    event LossEvent(int indexed gameId, uint8 slot, uint8 leaveType);
+    event GameOverEvent(int indexed gameId, uint8 winnerSlot, uint8 victoryReason);
 
     TotalGameState public tgs;
 
@@ -117,7 +122,7 @@ contract zkWitches {
         nw_verifierAddr = nw_verifier;
     }
 
-    function DEBUG_SetGameState(TotalGameState calldata inputTgs) external 
+    function DEBUG_SetGameState(TotalGameState calldata inputTgs) public onlyOwner
     {
         tgs = inputTgs;
     }
@@ -140,7 +145,7 @@ contract zkWitches {
         
         require(IHCVerifier(hc_verifierAddr).verifyProof(a, b, c, input), "Invalid handcommitment proof");
         
-        uint256 playerSlot = tgs.shared.currentNumberOfPlayers;
+        uint8 playerSlot = tgs.shared.currentNumberOfPlayers;
 
         tgs.addresses[playerSlot] = msg.sender;
         tgs.players[playerSlot].isAlive = true;
@@ -152,11 +157,17 @@ contract zkWitches {
             tgs.players[playerSlot].WitchAlive[i] = true;
         }
 
+        emit JoinGameEvent(tgs.shared.gameId, msg.sender, playerSlot);
+
         tgs.shared.currentNumberOfPlayers++;
 
         if (tgs.shared.currentNumberOfPlayers == 4)
-        {
+        { 
+            emit GameStartEvent(tgs.shared.gameId);     
             tgs.shared.stateEnum = WAITING_FOR_PLAYER_TURN;
+            tgs.shared.playerSlotWaiting = 0;
+            tgs.shared.playerAccusing = INVALID_SLOT;
+            tgs.shared.accusationWitchType = INVALID_SLOT;
         }
     }
 
@@ -212,6 +223,8 @@ contract zkWitches {
 
     function ActionCore(uint8 playerSlot, uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
     {
+        emit ActionEvent(tgs.shared.gameId, playerSlot, actionType, actionTarget, witchType, actionLevel);
+
         require(actionType >= FOOD && actionType <= INQUISITOR, "Unknown action");
         if (actionType == FOOD)
         {
@@ -322,37 +335,42 @@ contract zkWitches {
         {
             takeResources(slot, 2, 2);
         } else {
-            Die(slot);
+            Die(slot, LOSS_INQUISITION);
         }
     }
 
     // Game Loss and Surrender
 
+    uint8 constant LOSS_SURRENDER = 0;
+    uint8 constant LOSS_KICK = 1;
+    uint8 constant LOSS_INQUISITION = 2;
+
     function Surrender() external 
     {
+        if (CheckVictory()) { return; }
+
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
-        ForceLoss(slotByAddress(msg.sender));
+        ForceLoss(slotByAddress(msg.sender), LOSS_SURRENDER);
     }
 
     function KickCurrentPlayer() external
     {
-        // TODO Check if player has been waiting too long
-        uint8 slot = INVALID_SLOT;
-        if (false) 
+        if (CheckVictory()) { return; }
+
+        if (false || owner() == msg.sender) 
         {
-            ForceLoss(slot);
+            ForceLoss(tgs.shared.playerSlotWaiting, LOSS_KICK);
         }
     }
 
-    function ForceLoss(uint8 slot) internal
+    function ForceLoss(uint8 slot, uint8 reason) internal
     {
         require(tgs.shared.stateEnum != GAME_STARTING, "A Player cannot lose before the game starts."); // TODO fix - just need to write some logic for this case
-        require(tgs.shared.stateEnum != GAME_OVER, "The game is already over.");
         require(tgs.players[slot].isAlive, "Player is already dead.");
 
         // If the player is active we need to advance the game and THEN kick the player
-        Die(slot);
+        Die(slot, reason);
 
         if (tgs.shared.stateEnum == WAITING_FOR_PLAYER_TURN && tgs.shared.playerSlotWaiting == slot) 
         {
@@ -370,9 +388,10 @@ contract zkWitches {
         }
     }
 
-    function Die(uint8 slot) internal
+    function Die(uint8 slot, uint8 reason) internal
     {
         tgs.players[slot].isAlive = false;
+        emit LossEvent(tgs.shared.gameId, slot, reason);
     }
 
     function Advance() internal
@@ -395,25 +414,52 @@ contract zkWitches {
         CheckVictory();
     }
 
-    function CheckVictory() internal
+    uint8 constant VICTORY_RESOURCES = 0;
+    uint8 constant VICTORY_ELIMINATED = 1;
+
+    function CheckVictory() internal returns (bool)
     {
-        uint dead = 0;
-        for (uint i=0; i<4; i++)
+        uint8 dead = 0;
+        uint8 alivePlayer = 5;
+        for (uint8 i=0; i<4; i++)
         {   
             if (tgs.players[i].food >= 10 && tgs.players[i].lumber >= 10) 
             {
-                tgs.shared.stateEnum = GAME_OVER;
+                emit GameOverEvent(tgs.shared.gameId, i, VICTORY_RESOURCES);
+                ResetGame();
+                return true;
             } 
             if (!tgs.players[i].isAlive) 
             { 
                 dead++; 
+            } 
+            else 
+            {
+                alivePlayer = i;
             }
         }
         if (dead >= 3) 
         {
-            tgs.shared.stateEnum = GAME_OVER;
+            emit GameOverEvent(tgs.shared.gameId, alivePlayer, VICTORY_ELIMINATED);
+            ResetGame();
+            return true;
         }
+
+        return false;
     }
+
+    function ResetGame() internal 
+    {
+        for (uint i=0; i<4; i++)
+        {   
+            tgs.addresses[i] = address(0);
+        }
+
+        tgs.shared.currentNumberOfPlayers = 0;
+        tgs.shared.gameId++;
+        tgs.shared.stateEnum = GAME_STARTING;
+    }
+
 
     // TODO ADD RESET
 

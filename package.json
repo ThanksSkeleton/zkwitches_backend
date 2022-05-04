@@ -53,6 +53,7 @@
     "zeros": "^1.0.0"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
     "chai-as-promised": "^7.1.1"
   }
 }
