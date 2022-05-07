@@ -81,16 +81,16 @@ contract zkWitches is Ownable {
         bool[4] WitchAlive; 
     }
 
-    event GameStart(int indexed gameId);
+    event GameStart(int indexed gameId, uint timeStamp);
 
-    event Join(int indexed gameId, address indexed player, uint8 slot);    
+    event Join(int indexed gameId, address indexed player, uint8 slot, uint timeStamp);    
     
     // Action Types
     uint8 constant FOOD = 0;
     uint8 constant LUMBER = 1;
     uint8 constant BRIGAND = 2;
     uint8 constant INQUISITOR = 3;
-    event Action(int indexed gameId, address indexed player, uint8 slot, uint8 actionType, uint8 target, uint8 witchType, uint8 actionLevel);
+    event Action(int indexed gameId, address indexed player, uint8 slot, uint8 actionType, uint8 target, uint8 witchType, uint8 actionLevel, uint timeStamp);
 
     uint8 constant LOSS_SURRENDER = 0;
     uint8 constant LOSS_KICK = 1;
@@ -98,7 +98,9 @@ contract zkWitches is Ownable {
     uint8 constant LOSS_RESOURCES = 3;
     uint8 constant VICTORY_RESOURCES = 4;
     uint8 constant VICTORY_ELIMINATED = 5;
-    event VictoryLoss(int indexed gameId, address indexed player, uint8 slot, uint8 victoryLossType);
+    event VictoryLoss(int indexed gameId, address indexed player, uint8 slot, uint8 victoryLossType, uint timeStamp);
+
+    event AccusationResponse(int indexed gameId, address indexed player, uint8 slot, bool innocent, uint timeStamp);
 
     TotalGameState public tgs;
 
@@ -164,13 +166,13 @@ contract zkWitches is Ownable {
             tgs.players[playerSlot].WitchAlive[i] = true;
         }
 
-        emit Join(tgs.shared.gameId, msg.sender, playerSlot);
+        emit Join(tgs.shared.gameId, msg.sender, playerSlot, block.timestamp);
 
         tgs.shared.currentNumberOfPlayers++;
 
         if (tgs.shared.currentNumberOfPlayers == 4)
         { 
-            emit GameStart(tgs.shared.gameId);     
+            emit GameStart(tgs.shared.gameId, block.timestamp);     
             tgs.shared.stateEnum = WAITING_FOR_PLAYER_TURN;
             tgs.shared.playerSlotWaiting = 0;
             tgs.shared.playerAccusing = INVALID_SLOT;
@@ -230,7 +232,7 @@ contract zkWitches is Ownable {
 
     function ActionCore(uint8 playerSlot, uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
     {
-        emit Action(tgs.shared.gameId, tgs.addresses[playerSlot], playerSlot, actionType, actionTarget, witchType, actionLevel);
+        emit Action(tgs.shared.gameId, tgs.addresses[playerSlot], playerSlot, actionType, actionTarget, witchType, actionLevel, block.timestamp);
 
         require(actionType >= FOOD && actionType <= INQUISITOR, "Unknown action");
         if (actionType == FOOD)
@@ -319,6 +321,8 @@ contract zkWitches is Ownable {
 
         require(INWVerifier(nw_verifierAddr).verifyProof(a, b, c, input), "Invalid nowitch proof");
 
+        emit AccusationResponse(tgs.shared.gameId, msg.sender, slot, true, block.timestamp);
+
         // no reward
         Advance();
     }
@@ -335,6 +339,8 @@ contract zkWitches is Ownable {
     {
         require(tgs.shared.stateEnum == WAITING_FOR_PLAYER_ACCUSATION_RESPONSE, "Not waiting for a player response to accusation");
         require(tgs.shared.playerSlotWaiting == slot, "Not your response.");
+
+        emit AccusationResponse(tgs.shared.gameId, tgs.addresses[slot], slot, false, block.timestamp);
 
         addResources(tgs.shared.playerAccusing, 2, 2);
         tgs.players[slot].WitchAlive[tgs.shared.playerAccusing] = false;
@@ -387,7 +393,7 @@ contract zkWitches is Ownable {
     function Die(uint8 slot, uint8 reason) internal
     {
         tgs.players[slot].isAlive = false;
-        emit VictoryLoss(tgs.shared.gameId, tgs.addresses[slot], slot, reason);
+        emit VictoryLoss(tgs.shared.gameId, tgs.addresses[slot], slot, reason, block.timestamp);
     }
 
     function Advance() internal
@@ -419,7 +425,7 @@ contract zkWitches is Ownable {
         {   
             if (tgs.players[i].food >= 10 && tgs.players[i].lumber >= 10) 
             {
-                emit VictoryLoss(tgs.shared.gameId, tgs.addresses[i], i, VICTORY_RESOURCES);
+                emit VictoryLoss(tgs.shared.gameId, tgs.addresses[i], i, VICTORY_RESOURCES, block.timestamp);
                 for (uint8 j=0; j<4; j++)
                 {   
                     if (i != j && tgs.players[j].isAlive)
@@ -443,7 +449,7 @@ contract zkWitches is Ownable {
 
         if (dead >= 3) 
         {
-            emit VictoryLoss(tgs.shared.gameId, tgs.addresses[alivePlayer], alivePlayer, VICTORY_ELIMINATED);
+            emit VictoryLoss(tgs.shared.gameId, tgs.addresses[alivePlayer], alivePlayer, VICTORY_ELIMINATED, block.timestamp);
             ResetGame();
             return;
         }

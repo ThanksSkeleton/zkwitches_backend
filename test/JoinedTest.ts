@@ -162,7 +162,7 @@ describe("zkWitches Contract - Joined Game", function () {
         await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.be.rejected;        
     });
 
-    it("Witch Accusation Duel", async function() 
+    it("Witch Accusation Duel with events", async function() 
     {
         // They leave
         await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
@@ -180,6 +180,7 @@ describe("zkWitches Contract - Joined Game", function () {
         var nwcall_array = JSON.parse("[" + fs.readFileSync(nwcall) + "]");
         // I, p2 prove that I don't
         await expect(zkWitches.connect(p2).RespondAccusation_NoWitch(nwcall_array[0], nwcall_array[1], nwcall_array[2], nwcall_array[3])).to.not.be.rejected;
+
         // I, p2, accuse p1 of having a lumberjack witch
         await expect(zkWitches.connect(p2).ActionNoProof(3,0,1)).to.not.be.rejected;
         // I, p1, have to admit it.
@@ -187,7 +188,17 @@ describe("zkWitches Contract - Joined Game", function () {
    
         // Game Over.
         let tgs = await zkWitches.connect(p1).GetTGS();        
-        expect(tgs.shared.stateEnum).to.equal(0);
+        expect(tgs.shared.stateEnum).to.equal(0);       
+        
+        // Check events
+        let filter = zkWitches.filters.AccusationResponse(0);
+        let accusationResponses = await zkWitches.queryFilter(filter);
+
+        let p2_success_to_p1_accusation = accusationResponses.filter((v,i,a) => v.args.slot == 1);
+        expect(p2_success_to_p1_accusation[0].args.innocent).to.be.true;
+
+        let p1_fail_to_p2_accusation = accusationResponses.filter((v,i,a) => v.args.slot == 0);
+        expect(p1_fail_to_p2_accusation[0].args.innocent).to.be.false;
     });
 
     it("Join Events", async function() 
@@ -226,7 +237,7 @@ describe("zkWitches Contract - Joined Game", function () {
     // uint8 constant VICTORY_RESOURCES = 4;
     // uint8 constant VICTORY_ELIMINATED = 5;
 
-    it("Two Games", async function() 
+    it("Two Games with events", async function() 
     {
         {
             await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
