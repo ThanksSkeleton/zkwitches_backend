@@ -21,8 +21,9 @@ cp circuits/*.ts export/src/import
 cp circuits/*.json export/src/import
 
 # export solidity generated typescript bindings
-mkdir -p export/src/import/ZkWitches
-cp typechain-types/zkWitches.sol/ZkWitches.ts export/src/import/ZkWitches/ZkWitches.ts
+mkdir -p export/src/import/contracts
+mkdir -p export/src/import/contracts/ZkWitches
+cp typechain-types/contracts/zkWitches.sol/ZkWitches.ts export/src/import/contracts/ZkWitches/ZkWitches.ts
 cp typechain-types/common.ts export/src/import/common.ts
 
 # export ABI

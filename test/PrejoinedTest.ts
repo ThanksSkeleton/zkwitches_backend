@@ -4,10 +4,10 @@ import chai = require("chai");
 import { ethers } from "hardhat";
 import * as fs from "fs";
 import { ContractFactory, Contract, Signer } from "ethers";
-import { Verifier as HCVerifier } from "../typechain-types/HandCommitment_verifier.sol";
-import { Verifier as NWVerifier } from "../typechain-types/NoWitch_verifier.sol";
-import { Verifier as VMVerifier } from "../typechain-types/ValidMove_verifier.sol";
-import { ZkWitches  } from "../typechain-types/zkWitches.sol";
+import { Verifier as HCVerifier } from "../typechain-types/contracts/HandCommitment_verifier.sol";
+import { Verifier as NWVerifier } from "../typechain-types/contracts/NoWitch_verifier.sol";
+import { Verifier as VMVerifier } from "../typechain-types/contracts/ValidMove_verifier.sol";
+import { ZkWitches } from "../typechain-types/contracts/zkWitches.sol";
 import chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
@@ -123,7 +123,7 @@ describe("zkWitches Contract - Pre Joined Game", function () {
                 current_block: 0,
                 current_sequence_number: 0,
 
-                currentGameCount: 0
+                gameId: 0
             },
             addresses: ["0x8ba1f109551bd432803012645ac136ddd64dba72","0x8ba1f109551bd432803012645ac136ddd64dba71","0x8ba1f109551bd432803012645ac136ddd64dba70", "0x8ba1f109551bd432803012645ac136ddd64dba69"],
             players: [
@@ -178,7 +178,7 @@ describe("zkWitches Contract - Pre Joined Game", function () {
                 current_block: 0,
                 current_sequence_number: 0,
                 
-                currentGameCount: 0
+                gameId: 0
             },
             addresses: ["0x8ba1f109551bd432803012645ac136ddd64dba72","0x8ba1f109551bd432803012645ac136ddd64dba71","0x8ba1f109551bd432803012645ac136ddd64dba70", "0x8ba1f109551bd432803012645ac136ddd64dba69"],
             players: [

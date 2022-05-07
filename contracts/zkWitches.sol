@@ -347,8 +347,6 @@ contract zkWitches is Ownable {
 
     function Surrender() external 
     {
-        if (CheckVictory()) { return; }
-
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
         
         ForceLoss(slotByAddress(msg.sender), LOSS_SURRENDER);
@@ -356,9 +354,7 @@ contract zkWitches is Ownable {
 
     function KickCurrentPlayer() external
     {
-        if (CheckVictory()) { return; }
-
-        if (false || owner() == msg.sender) 
+        if ((false || owner() == msg.sender) && tgs.shared.currentNumberOfPlayers > 0)
         {
             ForceLoss(tgs.shared.playerSlotWaiting, LOSS_KICK);
         }
@@ -366,7 +362,6 @@ contract zkWitches is Ownable {
 
     function ForceLoss(uint8 slot, uint8 reason) internal
     {
-        require(tgs.shared.stateEnum != GAME_STARTING, "A Player cannot lose before the game starts."); // TODO fix - just need to write some logic for this case
         require(tgs.players[slot].isAlive, "Player is already dead.");
 
         // If the player is active we need to advance the game and THEN kick the player
@@ -459,9 +454,6 @@ contract zkWitches is Ownable {
         tgs.shared.gameId++;
         tgs.shared.stateEnum = GAME_STARTING;
     }
-
-
-    // TODO ADD RESET
 
     // Game State Advancement
 }

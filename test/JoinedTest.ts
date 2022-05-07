@@ -4,10 +4,10 @@ import chai = require("chai");
 import { ethers } from "hardhat";
 import * as fs from "fs";
 import { ContractFactory, Contract, Signer } from "ethers";
-import { Verifier as HCVerifier } from "../typechain-types/HandCommitment_verifier.sol";
-import { Verifier as NWVerifier } from "../typechain-types/NoWitch_verifier.sol";
-import { Verifier as VMVerifier } from "../typechain-types/ValidMove_verifier.sol";
-import { ZkWitches } from "../typechain-types/zkWitches.sol";
+import { Verifier as HCVerifier } from "../typechain-types/contracts/HandCommitment_verifier.sol";
+import { Verifier as NWVerifier } from "../typechain-types/contracts/NoWitch_verifier.sol";
+import { Verifier as VMVerifier } from "../typechain-types/contracts/ValidMove_verifier.sol";
+import { ZkWitches } from "../typechain-types/contracts/zkWitches.sol";
 import chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
@@ -46,6 +46,13 @@ describe("zkWitches Contract - Joined Game", function () {
         zkWitches = await fact4.deploy(hc_Verifier.address, vm_Verifier.address, nw_Verifier.address) as ZkWitches;
         await zkWitches.deployed();
 
+        await AllJoin();
+
+        // balance = await signers[0].getBalance();
+    });
+	
+    async function AllJoin()
+    {       
         const [owner, px1, px2, px3, px4, px5] = await ethers.getSigners();
         p1 = px1;
         p2 = px2;
@@ -58,9 +65,7 @@ describe("zkWitches Contract - Joined Game", function () {
         {
             await zkWitches.connect(player).JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3]);
         }
-        // balance = await signers[0].getBalance();
-    });
-	
+    }
 
     const hccall = "./circuits/build/HandCommitment/call.txt";
     const vmcall = "./circuits/build/ValidMove/call.txt";
@@ -117,7 +122,7 @@ describe("zkWitches Contract - Joined Game", function () {
         }
 
         let tgs = await zkWitches.connect(p1).GetTGS();
-        expect(tgs.shared.stateEnum).to.equal(3);   
+        expect(tgs.shared.stateEnum).to.equal(0);   
 
         await expect(zkWitches.connect(p1).Surrender()).to.be.rejected;
         await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.be.rejected;          
@@ -152,7 +157,7 @@ describe("zkWitches Contract - Joined Game", function () {
         // p2 is the winner at the end of his turn
 
         let tgs = await zkWitches.connect(p1).GetTGS();        
-        expect(tgs.shared.stateEnum).to.equal(3);
+        expect(tgs.shared.stateEnum).to.equal(0);
         
         await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.be.rejected;        
     });
@@ -182,6 +187,78 @@ describe("zkWitches Contract - Joined Game", function () {
    
         // Game Over.
         let tgs = await zkWitches.connect(p1).GetTGS();        
-        expect(tgs.shared.stateEnum).to.equal(3);
+        expect(tgs.shared.stateEnum).to.equal(0);
+    });
+
+    it("Join Events", async function() 
+    {
+        let filter = zkWitches.filters.JoinGameEvent(0);
+        let joinEvents = await zkWitches.queryFilter(filter);
+
+        expect(joinEvents.length).equals(4);
+    });
+
+    it("Action Events", async function() 
+    {
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.not.be.rejected;        
+
+        let filter = zkWitches.filters.ActionEvent(0);
+        let joinEvents = await zkWitches.queryFilter(filter);
+
+        expect(joinEvents.length).equals(2);
+    });
+
+    it("Loss Event", async function() 
+    {
+        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+
+        let filter = zkWitches.filters.LossEvent(0);
+        let joinEvents = await zkWitches.queryFilter(filter);
+
+        expect(joinEvents.length).equals(1);
+    });
+
+    it("Game Over Event", async function() 
+    {
+        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
+
+        let filter = zkWitches.filters.GameOverEvent(0);
+        let joinEvents = await zkWitches.queryFilter(filter);
+
+        expect(joinEvents.length).equals(1);
+
+        expect(joinEvents[0].args.winnerSlot == 3);
+    });
+
+    it("Two Games", async function() 
+    {
+        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
+
+        let filter = zkWitches.filters.GameOverEvent(0);
+        let joinEvents = await zkWitches.queryFilter(filter);
+
+        expect(joinEvents.length).equals(1);
+
+        expect(joinEvents[0].args.winnerSlot == 3);
+
+        // second game begins
+
+        await expect(AllJoin()).to.not.be.rejected;
+
+        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
+        await expect(zkWitches.connect(p4).Surrender()).to.not.be.rejected;        
+
+        let filter2 = zkWitches.filters.GameOverEvent(1);
+        let joinEvents2 = await zkWitches.queryFilter(filter2);
+
+        expect(joinEvents2.length).equals(1);
+
+        expect(joinEvents2[0].args.winnerSlot == 2);
     });
 });
