@@ -192,7 +192,7 @@ describe("zkWitches Contract - Joined Game", function () {
 
     it("Join Events", async function() 
     {
-        let filter = zkWitches.filters.JoinGameEvent(0);
+        let filter = zkWitches.filters.Join(0);
         let joinEvents = await zkWitches.queryFilter(filter);
 
         expect(joinEvents.length).equals(4);
@@ -203,7 +203,7 @@ describe("zkWitches Contract - Joined Game", function () {
         await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
         await expect(zkWitches.connect(p2).ActionNoProof(0,0,0)).to.not.be.rejected;        
 
-        let filter = zkWitches.filters.ActionEvent(0);
+        let filter = zkWitches.filters.Action(0);
         let joinEvents = await zkWitches.queryFilter(filter);
 
         expect(joinEvents.length).equals(2);
@@ -213,52 +213,57 @@ describe("zkWitches Contract - Joined Game", function () {
     {
         await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
 
-        let filter = zkWitches.filters.LossEvent(0);
+        let filter = zkWitches.filters.VictoryLoss(0);
         let joinEvents = await zkWitches.queryFilter(filter);
 
         expect(joinEvents.length).equals(1);
     });
 
-    it("Game Over Event", async function() 
-    {
-        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
-        await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
-        await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
-
-        let filter = zkWitches.filters.GameOverEvent(0);
-        let joinEvents = await zkWitches.queryFilter(filter);
-
-        expect(joinEvents.length).equals(1);
-
-        expect(joinEvents[0].args.winnerSlot == 3);
-    });
+    // uint8 constant LOSS_SURRENDER = 0;
+    // uint8 constant LOSS_KICK = 1;
+    // uint8 constant LOSS_INQUISITION = 2;
+    // uint8 constant LOSS_RESOURCES = 3;
+    // uint8 constant VICTORY_RESOURCES = 4;
+    // uint8 constant VICTORY_ELIMINATED = 5;
 
     it("Two Games", async function() 
     {
-        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
-        await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
-        await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
+        {
+            await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+            await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
+            await expect(zkWitches.connect(p3).Surrender()).to.not.be.rejected;        
 
-        let filter = zkWitches.filters.GameOverEvent(0);
-        let joinEvents = await zkWitches.queryFilter(filter);
+            let filter = zkWitches.filters.VictoryLoss(0);
+            let victoryLossEvents = await zkWitches.queryFilter(filter);
 
-        expect(joinEvents.length).equals(1);
+            expect(victoryLossEvents.length).equals(4);
 
-        expect(joinEvents[0].args.winnerSlot == 3);
+            let expectedWinEvent = victoryLossEvents.filter((v,i,a) => v.args.victoryLossType == 5)[0];
+            let expectedLossEvents = victoryLossEvents.filter((v,i,a) => v.args.victoryLossType == 0);
+
+            expect(expectedWinEvent.args.slot).to.equal(3);
+            expect(expectedLossEvents.length).to.equal(3);
+        }
 
         // second game begins
+        {
+            await expect(AllJoin()).to.not.be.rejected;
 
-        await expect(AllJoin()).to.not.be.rejected;
+            await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
+            await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;
 
-        await expect(zkWitches.connect(p1).Surrender()).to.not.be.rejected;        
-        await expect(zkWitches.connect(p2).Surrender()).to.not.be.rejected;        
-        await expect(zkWitches.connect(p4).Surrender()).to.not.be.rejected;        
+            await expect(zkWitches.connect(p4).Surrender()).to.not.be.rejected;        
 
-        let filter2 = zkWitches.filters.GameOverEvent(1);
-        let joinEvents2 = await zkWitches.queryFilter(filter2);
+            let filter = zkWitches.filters.VictoryLoss(1);
+            let victoryLossEvents = await zkWitches.queryFilter(filter);
 
-        expect(joinEvents2.length).equals(1);
+            expect(victoryLossEvents.length).equals(4);
 
-        expect(joinEvents2[0].args.winnerSlot == 2);
+            let expectedWinEvent = victoryLossEvents.filter((v,i,a) => v.args.victoryLossType == 5)[0];
+            let expectedLossEvents = victoryLossEvents.filter((v,i,a) => v.args.victoryLossType == 0);
+
+            expect(expectedWinEvent.args.slot).to.equal(2);
+            expect(expectedLossEvents.length).to.equal(3);
+        }
     });
 });

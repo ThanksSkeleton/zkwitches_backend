@@ -33,17 +33,6 @@ interface IVMVerifier {
 
 contract zkWitches is Ownable {
 
-    // Action Types
-    uint8 constant FOOD = 0;
-    uint8 constant LUMBER = 1;
-    uint8 constant BRIGAND = 2;
-    uint8 constant INQUISITOR = 3;
-
-    // GameState Types
-    uint8 constant GAME_STARTING = 0;
-    uint8 constant WAITING_FOR_PLAYER_TURN = 1;
-    uint8 constant WAITING_FOR_PLAYER_ACCUSATION_RESPONSE = 2;
-
     uint8 constant INVALID_SLOT = 5;
 
     uint8 constant STARTING_FOOD = 2;
@@ -56,6 +45,11 @@ contract zkWitches is Ownable {
         address[4] addresses;
         PlayerState[4] players;
     }
+
+    // StateEnum
+    uint8 constant GAME_STARTING = 0;
+    uint8 constant WAITING_FOR_PLAYER_TURN = 1;
+    uint8 constant WAITING_FOR_PLAYER_ACCUSATION_RESPONSE = 2;
 
     struct SharedState 
     {
@@ -87,11 +81,24 @@ contract zkWitches is Ownable {
         bool[4] WitchAlive; 
     }
 
-    event GameStartEvent(int indexed gameId);
-    event JoinGameEvent(int indexed gameId, address indexed player, uint8 slot);
-    event ActionEvent(int indexed gameId, uint8 slot, uint8 action, uint8 target, uint8 witchType, uint8 actionLevel);
-    event LossEvent(int indexed gameId, uint8 slot, uint8 leaveType);
-    event GameOverEvent(int indexed gameId, uint8 winnerSlot, uint8 victoryReason);
+    event GameStart(int indexed gameId);
+
+    event Join(int indexed gameId, address indexed player, uint8 slot);    
+    
+    // Action Types
+    uint8 constant FOOD = 0;
+    uint8 constant LUMBER = 1;
+    uint8 constant BRIGAND = 2;
+    uint8 constant INQUISITOR = 3;
+    event Action(int indexed gameId, address indexed player, uint8 slot, uint8 actionType, uint8 target, uint8 witchType, uint8 actionLevel);
+
+    uint8 constant LOSS_SURRENDER = 0;
+    uint8 constant LOSS_KICK = 1;
+    uint8 constant LOSS_INQUISITION = 2;
+    uint8 constant LOSS_RESOURCES = 3;
+    uint8 constant VICTORY_RESOURCES = 4;
+    uint8 constant VICTORY_ELIMINATED = 5;
+    event VictoryLoss(int indexed gameId, address indexed player, uint8 slot, uint8 victoryLossType);
 
     TotalGameState public tgs;
 
@@ -157,13 +164,13 @@ contract zkWitches is Ownable {
             tgs.players[playerSlot].WitchAlive[i] = true;
         }
 
-        emit JoinGameEvent(tgs.shared.gameId, msg.sender, playerSlot);
+        emit Join(tgs.shared.gameId, msg.sender, playerSlot);
 
         tgs.shared.currentNumberOfPlayers++;
 
         if (tgs.shared.currentNumberOfPlayers == 4)
         { 
-            emit GameStartEvent(tgs.shared.gameId);     
+            emit GameStart(tgs.shared.gameId);     
             tgs.shared.stateEnum = WAITING_FOR_PLAYER_TURN;
             tgs.shared.playerSlotWaiting = 0;
             tgs.shared.playerAccusing = INVALID_SLOT;
@@ -223,7 +230,7 @@ contract zkWitches is Ownable {
 
     function ActionCore(uint8 playerSlot, uint8 actionType, uint8 actionTarget, uint8 witchType, uint8 actionLevel) private
     {
-        emit ActionEvent(tgs.shared.gameId, playerSlot, actionType, actionTarget, witchType, actionLevel);
+        emit Action(tgs.shared.gameId, tgs.addresses[playerSlot], playerSlot, actionType, actionTarget, witchType, actionLevel);
 
         require(actionType >= FOOD && actionType <= INQUISITOR, "Unknown action");
         if (actionType == FOOD)
@@ -339,12 +346,6 @@ contract zkWitches is Ownable {
         }
     }
 
-    // Game Loss and Surrender
-
-    uint8 constant LOSS_SURRENDER = 0;
-    uint8 constant LOSS_KICK = 1;
-    uint8 constant LOSS_INQUISITION = 2;
-
     function Surrender() external 
     {
         require(slotByAddress(msg.sender) != INVALID_SLOT, "Address is Not a valid Player");        
@@ -386,7 +387,7 @@ contract zkWitches is Ownable {
     function Die(uint8 slot, uint8 reason) internal
     {
         tgs.players[slot].isAlive = false;
-        emit LossEvent(tgs.shared.gameId, slot, reason);
+        emit VictoryLoss(tgs.shared.gameId, tgs.addresses[slot], slot, reason);
     }
 
     function Advance() internal
@@ -409,10 +410,8 @@ contract zkWitches is Ownable {
         CheckVictory();
     }
 
-    uint8 constant VICTORY_RESOURCES = 0;
-    uint8 constant VICTORY_ELIMINATED = 1;
 
-    function CheckVictory() internal returns (bool)
+    function CheckVictory() internal
     {
         uint8 dead = 0;
         uint8 alivePlayer = 5;
@@ -420,9 +419,17 @@ contract zkWitches is Ownable {
         {   
             if (tgs.players[i].food >= 10 && tgs.players[i].lumber >= 10) 
             {
-                emit GameOverEvent(tgs.shared.gameId, i, VICTORY_RESOURCES);
+                emit VictoryLoss(tgs.shared.gameId, tgs.addresses[i], i, VICTORY_RESOURCES);
+                for (uint8 j=0; j<4; j++)
+                {   
+                    if (i != j && tgs.players[j].isAlive)
+                    {
+                        Die(j, LOSS_RESOURCES);
+                    }
+                }
+
                 ResetGame();
-                return true;
+                return;
             } 
             if (!tgs.players[i].isAlive) 
             { 
@@ -433,14 +440,15 @@ contract zkWitches is Ownable {
                 alivePlayer = i;
             }
         }
+
         if (dead >= 3) 
         {
-            emit GameOverEvent(tgs.shared.gameId, alivePlayer, VICTORY_ELIMINATED);
+            emit VictoryLoss(tgs.shared.gameId, tgs.addresses[alivePlayer], alivePlayer, VICTORY_ELIMINATED);
             ResetGame();
-            return true;
+            return;
         }
 
-        return false;
+        return;
     }
 
     function ResetGame() internal 
