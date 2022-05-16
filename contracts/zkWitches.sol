@@ -214,8 +214,9 @@ contract zkWitches is Ownable {
         }
 
         require(IVMVerifier(vm_verifierAddr).verifyProof(a, b, c, input), "Invalid validmove proof");
+        require(1 <= input[6] && input[6] <= 3, "CitizenCount must be between 1 and 3 for a proof action");
 
-        ActionCore(slot, uint8(input[5]), actionTarget, uint8(input[6]), witchType);
+        ActionCore(slot, uint8(input[5]), actionTarget, witchType, uint8(input[6]));
     }
 
     function ActionNoProof(uint8 actionType, uint8 actionTarget, uint8 witchType) external 

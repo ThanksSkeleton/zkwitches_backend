@@ -81,15 +81,27 @@ describe("zkWitches Contract - Joined Game", function () {
         await expect(zkWitches.connect(stranger).JoinGame(hccall_array[0], hccall_array[1], hccall_array[2], hccall_array[3])).to.be.rejected;
     });
 
-    it("Player 1 can make an proof based action", async function() 
+    it("Player 1 can make an proof based action with resource check", async function() 
     {
+        let old_tgs = await zkWitches.connect(p1).GetTGS();
+        expect(old_tgs.players[0].lumber).to.eq(2);    
+
         var vmcall_array = JSON.parse("[" + fs.readFileSync(vmcall) + "]");
-        await expect(zkWitches.connect(p1).ActionWithProof(0,0, vmcall_array[0], vmcall_array[1], vmcall_array[2], vmcall_array[3])).to.not.be.rejected;        
+        await expect(zkWitches.connect(p1).ActionWithProof(0,0, vmcall_array[0], vmcall_array[1], vmcall_array[2], vmcall_array[3])).to.not.be.rejected;     // gather 4 lumber
+
+        let new_tgs = await zkWitches.connect(p1).GetTGS();
+        expect(new_tgs.players[0].lumber).to.eq((2+4));   
     });
 
-    it("Player 1 can make an normal action", async function() 
+    it("Player 1 can make an normal action with resource check", async function() 
     {
-        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        
+        let old_tgs = await zkWitches.connect(p1).GetTGS();
+        expect(old_tgs.players[0].food == (2)).to.be.true;    
+
+        await expect(zkWitches.connect(p1).ActionNoProof(0,0,0)).to.not.be.rejected;        // gather 1 food
+
+        let new_tgs = await zkWitches.connect(p1).GetTGS();
+        expect(new_tgs.players[0].food == (2+1)).to.be.true;    
     });
 
     it("Players can go in order", async function() 
