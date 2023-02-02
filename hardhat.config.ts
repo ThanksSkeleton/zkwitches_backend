@@ -24,13 +24,13 @@ const config: HardhatUserConfig = {
 			chainId: 1337,
         },
         testnet: {
-            url: "https://api.s0.b.hmny.io",
-            chainId: 1666700000,
+            url: "https://goerli.optimism.io",
+            chainId: 420,
             accounts: [`${testkey}`]
         },
         mainnet: {
-            url: "https://api.s0.t.hmny.io",
-            chainId: 1666600000,
+            url: "https://optimism-mainnet.public.blastapi.io",
+            chainId: 10,
             accounts: [`${productionkey}`]
         },
     },

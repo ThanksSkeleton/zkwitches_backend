@@ -1,8 +1,0 @@
-~/CryptoClass/zkwitches_backend$ npx hardhat deploy --network testnet
-Nothing to compile
-No need to generate any newer typings.
-deploying "" (tx: 0xa8f0d8f39f925de1ba7b8534aaddc2027ed51df0fefa6f861ac876ebb2059018)...: deployed at 0xeC065D4F2F6f863CABd17c1cDd75f7d0dB70Fb06 with 1108210 gas
-Deploying vm
-deploying "" (tx: 0x29c108159f048421498560d5a13ad2c6414823e44f1b031d7376f23827726208)...: deployed at 0xA265Abb2C0B6cB9c07750cC228E7CE706b440F71 with 1281440 gas
-deploying "" (tx: 0xd48ab6771f200c4a1c8a864f52371b620e4728c21ba9f586febeb5af66643290)...: deployed at 0x0Ce5a313B95A2A8F63f7066dD5B457c114F0DaA4 with 1113389 gas
-deploying "zkWitches" (tx: 0x7b8b82eeaaec8f344a008b4690f4bd75cc93fad010e28dd4ecbe92431ef961ad)...: deployed at 0xB6Ef32a400b06A8245D90c0B9C862ACbD3cEDE07 with 2738157 gas
