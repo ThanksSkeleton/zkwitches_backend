@@ -121,7 +121,11 @@ contracts/archive
 circuits/build/**
 artifacts
 export
-private_keys.json
 typechain-types
+
 #TODO Add Verifiers to ignore once build process is nice and clean
 # contracts/*.sol !contracts/zkWitches.sol
+
+#Private Keys + Secrets
+private_keys.json
+etherscan_api_keys.json

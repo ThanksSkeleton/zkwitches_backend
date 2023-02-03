@@ -1,0 +1,8 @@
+export default config;thanks@LAPTOP-4NRO4SU2:~/work/zkwitches_backend$ npx hardhat deploy --network testnet
+Nothing to compile
+No need to generate any newer typings.
+deploying "" (tx: 0xc8b41b486f8c5cee03c6d7df567a9dd386af0331b82a0e8c0bc679124b691c0d)...: deployed at 0x5327Dc37D31b9c093C2E89d1419115Ce5c59800B with 1107994 gas
+Deploying vm
+deploying "" (tx: 0x8b64c37f47a2f6ab6e2e0482eb33024c74bce77636fffff11b929d766bb9f55c)...: deployed at 0x9253453dbC1d6F34FCb59b6475EAebAabf3B432D with 1281440 gas
+deploying "" (tx: 0x612209a504fe644ccb94671b89df6a48f053fed4325408f20d4e6607aa8dbe6b)...: deployed at 0x4Dded12f91D5522857ceD7Aefdd6691B0257b19e with 1113413 gas
+deploying "zkWitches" (tx: 0xa9fbb7bf9b59bbb485744d96df2d1e34690e6428700323c73f3dc0d6cf8e5d7b)...: deployed at 0x2f04B25EA57Fd44D1DAac2268DfB31C92b4DA01F with 2729350 gas

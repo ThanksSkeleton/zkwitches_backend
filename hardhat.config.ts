@@ -4,8 +4,10 @@ import 'hardhat-deploy';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-gas-reporter';
 import '@typechain/hardhat';
+import "@nomiclabs/hardhat-etherscan";
 
 const { testkey, productionkey } = require("./private_keys.json");
+const { etherscan_test_api_key, etherscan_production_api_key } = require("./etherscan_api_keys.json");
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -23,17 +25,24 @@ const config: HardhatUserConfig = {
             blockGasLimit: 0x1fffffffffffff,
 			chainId: 1337,
         },
-        testnet: {
+        optimisticGoerli: {
             url: "https://goerli.optimism.io",
             chainId: 420,
             accounts: [`${testkey}`]
         },
-        mainnet: {
+        optimisticEthereum: {
             url: "https://optimism-mainnet.public.blastapi.io",
             chainId: 10,
             accounts: [`${productionkey}`]
         },
     },
+    etherscan: {
+      apiKey: {
+        optimisticEthereum: `${etherscan_production_api_key}`,
+        optimisticGoerli: `${etherscan_test_api_key}`,
+      }
+    },
+
     namedAccounts: {
         deployer: 0,
     },
